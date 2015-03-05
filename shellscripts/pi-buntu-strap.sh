@@ -94,6 +94,7 @@ fi
 PIBLOCKS=$(( $PISIZE / 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
 dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
+dd if=/dev/zero bs=1048576 count=128 of=disk.img 
 modprobe -v loop 
 FREELOOP=` losetup -f `
 retval=$?
