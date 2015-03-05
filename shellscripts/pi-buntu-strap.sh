@@ -26,7 +26,7 @@ if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
 fi
 if [ -z "$PIDISTRO" ] ; then
-	PIDISTRO="trusty" 
+	PIDISTRO="utopic" 
 fi
 
 me=` id -u `
