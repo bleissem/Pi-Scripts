@@ -1,0 +1,11 @@
+deb http://ports.ubuntu.com UBUNTUCODENAME main restricted
+ 
+deb http://ports.ubuntu.com UBUNTUCODENAME-updates main restricted
+deb http://ports.ubuntu.com UBUNTUCODENAME universe
+deb http://ports.ubuntu.com UBUNTUCODENAME-updates universe
+deb http://ports.ubuntu.com UBUNTUCODENAME multiverse
+deb http://ports.ubuntu.com UBUNTUCODENAME-updates multiverse
+ 
+deb http://security.ubuntu.com/ubuntu UBUNTUCODENAME-security main restricted
+deb http://security.ubuntu.com/ubuntu UBUNTUCODENAME-security universe
+deb http://security.ubuntu.com/ubuntu UBUNTUCODENAME-security multiverse 
