@@ -97,7 +97,6 @@ fi
 PIBLOCKS=$(( $PISIZE / 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
 dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
-dd if=/dev/zero bs=1048576 count=128 of=disk.img 
 modprobe -v loop 
 FREELOOP=` losetup -f `
 retval=$?
@@ -110,6 +109,7 @@ fi
 
 echo "OK, using loop device $FREELOOP"
 losetup $FREELOOP disk.img
+dd if=/dev/zero bs=1048576 count=128 of=$FREELOOP
 echo "OK, partitioning the device"
 parted -s $FREELOOP mklabel msdos
 parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
@@ -127,6 +127,9 @@ else
 fi
 
 echo "OK, creating filesystems"
+for n in 1 2 3 ; do
+	dd if=/dev/zero bs=1M count=8 of=/dev/mapper/$( basename $FREELOOP )p${n} 
+done 
 mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
 mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 
