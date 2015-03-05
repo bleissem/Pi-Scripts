@@ -108,10 +108,14 @@ echo "OK, partitioning the device"
 parted -s $FREELOOP mklabel msdos
 parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
 parted -s $FREELOOP unit B mkpart primary ext2 67108864 '100%'
-parted -s $FREELOOP unit M print
-
+parted -s $FREELOOP unit B print
+echo "OK, creating device mappings"
+kpartx -s -v -a $FREELOOP
 
 # Clean up 
+for n in ` seq 1 9 ` ; do
+	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n}  
+done 
 losetup -d $FREELOOP 
 umount /usr/share/debootstrap
 
