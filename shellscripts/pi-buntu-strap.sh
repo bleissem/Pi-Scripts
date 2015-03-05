@@ -139,6 +139,10 @@ retval=$?
 if [ "$retval" -gt 0 ] ; then
 	echo ':-( Oops debootstrap failed with exit code'"$retval"
 	umount targetfs
+	for n in ` seq 1 9 ` ; do
+		dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
+	done 
+	losetup -d $FREELOOP 
 	exit 1
 fi
 
