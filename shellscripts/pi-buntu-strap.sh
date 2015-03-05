@@ -59,13 +59,13 @@ fi
 
 # Check for more programs
 
-progsneeded="gcc bc patch make mkimage git wget kpartx parted"
+progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4"
 for p in $progsneeded ; do
 	which $p
 	retval=$?
 	if [ "$retval" -gt 0 ] ; then
 		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs"
 		exit 1
 	else
 		echo "OK, found $p..."
@@ -111,10 +111,13 @@ parted -s $FREELOOP unit B mkpart primary ext2 67108864 '100%'
 parted -s $FREELOOP unit B print
 echo "OK, creating device mappings"
 kpartx -s -v -a $FREELOOP
+echo "OK, creating filesystems"
+mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
+mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p2
 
 # Clean up 
 for n in ` seq 1 9 ` ; do
-	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n}  
+	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
 done 
 losetup -d $FREELOOP 
 umount /usr/share/debootstrap
