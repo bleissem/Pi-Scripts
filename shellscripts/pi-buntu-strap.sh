@@ -77,13 +77,14 @@ done
 
 # Download and unpack debootstrap:
 
-test -f debootstrap_${DEBOOTSTRAP}.tar.gz || \
-wget http://ports.ubuntu.com/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}.tar.gz
-
-test -f debootstrap_${DEBOOTSTRAP}.tar.gz && \
-tar xzf debootstrap_${DEBOOTSTRAP}.tar.gz && \
-mkdir -p /usr/share/debootstrap && \
-mount --bind debootstrap-${DEBOOTSTRAP} /usr/share/debootstrap
+test -f debootstrap_${DEBOOTSTRAP}_all.deb || \
+wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}_all.deb
+# wget http://ports.ubuntu.com/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}.tar.gz
+dpkg -i debootstrap_${DEBOOTSTRAP}_all.deb
+# test -f debootstrap_${DEBOOTSTRAP}.tar.gz && \
+# tar xzf debootstrap_${DEBOOTSTRAP}.tar.gz && \
+# mkdir -p /usr/share/debootstrap && \
+# mount --bind debootstrap-${DEBOOTSTRAP} /usr/share/debootstrap
 
 if debootstrap-${DEBOOTSTRAP}/debootstrap --help ; then
 	echo "OK, debootstrap works"
@@ -102,6 +103,7 @@ FREELOOP=` losetup -f `
 retval=$?
 if [ "$retval" -gt 0 ] ; then
 	echo ':-( No free loop device found.'
+	umount /usr/share/debootstrap
 	exit 1
 fi
 
@@ -122,6 +124,7 @@ if [ -b /dev/mapper/$( basename $FREELOOP )p1 ] ; then
 	echo "OK, mapped devices created"
 else
 	echo ':-( Device mapper is not working.'
+	umount /usr/share/debootstrap
 	losetup -d $FREELOOP 
 	exit 1
 fi
