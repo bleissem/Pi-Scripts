@@ -134,6 +134,12 @@ mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 mkdir -p targetfs
 mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
 debootstrap --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
+retval=$?
+if [ "$retval" -gt 0 ] ; then
+	echo ':-( Oops debootstrap failed.'
+	umount targetfs
+	exit 1
+fi
 
 # Build and install a kernel for Raspberry Pi 2
 
@@ -143,11 +149,21 @@ debootstrap --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
 
 # Build and install U-Boot for Banana Pi M1
 
+# Install base configuration
+
 # Install additional software
 
 # Add a user if requested
 
 # Clean up 
+umount targetfs/boot
+umount targetfs
+retval=$?
+if [ "$retval" -gt 0 ] ; then
+	echo ':-/ Oops umount failed. This should not be a big deal - just reboot now!'
+	exit 0
+fi
+
 for n in ` seq 1 9 ` ; do
 	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
 done 
