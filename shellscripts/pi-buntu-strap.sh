@@ -133,10 +133,11 @@ mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 # Mount the disk image and install the base filesystem
 mkdir -p targetfs
 mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
-debootstrap-${DEBOOTSTRAP}/debootstrap --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
+debootstrap-${DEBOOTSTRAP}/debootstrap --verbose $PIDISTRO targetfs http://ports.ubuntu.com/
 retval=$?
+
 if [ "$retval" -gt 0 ] ; then
-	echo ':-( Oops debootstrap failed.'
+	echo ':-( Oops debootstrap failed with exit code'"$retval"
 	umount targetfs
 	exit 1
 fi
