@@ -20,6 +20,8 @@
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
+DEBOOTSTRAP=1.0.67
+
 me=` id -u `
 if [ "$me" -gt 0 ] ; then
 	echo 'Please run this script with root privileges!'
@@ -46,7 +48,7 @@ if which dpkg ; then
 elif [ "$IGNOREDPKG" -gt 0 ] ; then
 	echo "OK, ignoring dpkg..."
 else
-	echo ':-( Dpkg was not found, if you are running on non-debian, install debootstrap manually'
+	echo ':-( Dpkg was not found, this script is not yet tested on non-debian distributions'
 	exit 1
 fi
 
@@ -60,9 +62,31 @@ for p in $progsneeded ; do
 		echo "$p is missing. Please install dependencies:"
 		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget"
 		exit 1
+	else
+		echo "OK, found $p..."
 	fi
 done
 
+# Download and unpack debootstrap:
 
+test -f debootstrap_${DEBOOTSTRAP}.tar.gz || \
+wget http://ports.ubuntu.com/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}.tar.gz
+
+test -f debootstrap_${DEBOOTSTRAP}.tar.gz && \
+tar xzf debootstrap_${DEBOOTSTRAP}.tar.gz && \
+mkdir -p /usr/share/debootstrap && \
+mount --bind debootstrap-${DEBOOTSTRAP} /usr/share/debootstrap
+
+if debootstrap-${DEBOOTSTRAP}/debootstrap --help ; then
+	echo "OK, debootstrap works"
+else
+	umount /usr/share/debootstrap
+	exit 1
+fi
+
+# 
+
+# Clean up 
+umount /usr/share/debootstrap
 
 
