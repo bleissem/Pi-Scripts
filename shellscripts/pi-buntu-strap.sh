@@ -15,12 +15,16 @@
 # PIPACKAGES="lubuntu-desktop language-support-de" # Additional packages to include
 # PITARGET=/dev/sdc # Path to a block device or name of a file 
 # PISIZE=4000000000 # Size of the image to create, will be rounded down to full MB
+# PISWAP=500000000  # Size of swap partition - currently inactive
 # PIHOSTNAME=pibuntu # Hostname to use
 # PIUSER=mattias # Create an unprivileged user - leave empty to skip
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
 DEBOOTSTRAP=1.0.67
+if [ -z "$PISIZE" ] ; then
+	PISIZE=4000000000
+fi
 
 me=` id -u `
 if [ "$me" -gt 0 ] ; then
@@ -54,13 +58,13 @@ fi
 
 # Check for more programs
 
-progsneeded="gcc bc patch make mkimage git wget"
+progsneeded="gcc bc patch make mkimage git wget kpartx"
 for p in $progsneeded ; do
 	which $p
 	retval=$?
 	if [ "$retval" -gt 0 ] ; then
 		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx"
 		exit 1
 	else
 		echo "OK, found $p..."
@@ -84,7 +88,10 @@ else
 	exit 1
 fi
 
-# 
+# Calculate the size of the image
+
+PIBLOCKS=$(( $PISIZE / 1048576 ))
+echo "OK, using $PIBLOCKS one MB blocks"
 
 # Clean up 
 umount /usr/share/debootstrap
