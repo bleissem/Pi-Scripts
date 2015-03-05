@@ -22,6 +22,8 @@
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
 DEBOOTSTRAP=1.0.67
+KERNELMAJOR=3.19
+
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
 fi
@@ -182,15 +184,29 @@ for d in dev/pts dev proc sys tmp root var/cache/apt/archives ; do
 	umount targetfs/${d} 
 done
 
+# Configure /etc/fstab and console
+
 # Build and install a kernel for Raspberry Pi 2
 
 # Build and install a kernel for Banana Pi M1
+
+test -f linux-${KERNELMAJOR}.tar.xz || \
+wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
+test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
+( cd linux-${KERNELMAJOR} ; make distclean )
+install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1" linux-${KERNELMAJOR}/.config
+cd linux-${KERNELMAJOR}
+yes '' | make oldconfig
+make -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
+INSTALL_MOD_PATH=../targetfs make modules_install
+install -m 0644 arch/arm/boot/uImage ../targetfs/boot
+cd ..
 
 # Build and install the bootloader for Raspberry Pi 2
 
 # Build and install U-Boot for Banana Pi M1
 
-# Install base configuration
+# Install basic configuration
 
 # Add a user if requested
 
