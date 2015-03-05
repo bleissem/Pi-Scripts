@@ -35,6 +35,11 @@ if [ "$me" -gt 0 ] ; then
 	exit 1
 fi
 
+# Find out the basedir
+
+basedir=` dirname "$0" `
+basedir=` dirname "$basedir" `
+
 # Check the architecture we are running on
 
 case ` uname -m ` in
@@ -75,7 +80,7 @@ for p in $progsneeded ; do
 	fi
 done
 
-# Download and unpack debootstrap:
+# Download and install debootstrap:
 
 test -f debootstrap_${DEBOOTSTRAP}_all.deb || \
 wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}_all.deb
@@ -139,7 +144,8 @@ mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 # Mount the disk image and install the base filesystem
 mkdir -p targetfs
 mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
-debootstrap-${DEBOOTSTRAP}/debootstrap --verbose --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
+debootstrap-${DEBOOTSTRAP}/debootstrap --verbose \
+	--arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
 retval=$?
 
 if [ "$retval" -gt 0 ] ; then
@@ -155,19 +161,24 @@ fi
 # Install additional software
 
 mount --bind /dev targetfs/dev
-mount --bind /proc targetfs/proc 
+mount -t devpts none targetfs/dev/pts
+mount -t proc none targetfs/proc 
 mount --bind /sys targetfs/sys
 mount -t tmpfs -o mode=0755,size=256M tmpfs targetfs/tmp
 mount -t tmpfs -o mode=0755,size=64M  tmpfs targetfs/root
 mkdir -p packages
 mount --bind packages targetfs/var/cache/apt/archives
 echo 'nameserver 8.8.8.8' > targetfs/etc/resolv.conf 
+install -m 0644 "${basedir}/configfiles/sources.list.ubuntu" targetfs/etc/apt/sources.list 
+sed -i 's/UBUNTUCODENAME/'${PIDISTRO}'/g' targetfs/etc/apt/sources.list
+LC_ALL=POSIX chroot targetfs apt-get update
+LC_ALL=POSIX chroot targetfs apt-get -y dist-upgrade
 
-for p in $PIPACKAGES; do
-	chroot targetfs apt-get -y install $p
+for p in language-pack-en $PIPACKAGES; do
+	LC_ALL=POSIX chroot targetfs apt-get -y install $p
 done
 
-for d in dev proc sys tmp root var/cache/apt/archives ; do
+for d in dev/pts dev proc sys tmp root var/cache/apt/archives ; do
 	umount targetfs/${d} 
 done
 
