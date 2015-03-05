@@ -54,10 +54,15 @@ fi
 
 progsneeded="gcc bc patch make mkimage git wget"
 for p in $progsneeded ; do
-	echo "$p is missing. Please install dependencies:"
-	echo "apt-get install bc libncurses5-dev build-essential u-boot-tools git wget"
-	exit 1
+	which $p
+	retval=$?
+	if [ "$retval" -gt 0 ] ; then
+		echo "$p is missing. Please install dependencies:"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget"
+		exit 1
+	fi
 done
+
 
 
 
