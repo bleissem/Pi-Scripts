@@ -37,6 +37,7 @@ fi
 case ` uname -m ` in
 	armv7l )
 		echo "OK, running on ARMv7..."
+		echo "Called as $0"
 	;;
 	* )
 		echo ':-( Cross compiling the kernel and bootloader is not yet supported'
