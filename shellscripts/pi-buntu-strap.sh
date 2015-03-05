@@ -137,16 +137,33 @@ debootstrap-${DEBOOTSTRAP}/debootstrap --verbose $PIDISTRO targetfs http://ports
 retval=$?
 
 if [ "$retval" -gt 0 ] ; then
-	echo ':-( Oops debootstrap failed with exit code'"$retval"
-	umount targetfs
-	for n in ` seq 1 9 ` ; do
-		dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
-	done 
-	losetup -d $FREELOOP 
-	exit 1
+	echo ':-/ Oops debootstrap failed with exit code '"$retval"
+	# umount targetfs
+	# for n in ` seq 1 9 ` ; do
+	#	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
+	# done 
+	# losetup -d $FREELOOP 
+	# exit 1
 fi
 
 # Install additional software
+
+mount --bind /dev targetfs/dev
+mount --bind /proc targetfs/proc 
+mount --bind /sys targetfs/sys
+mount -t tmpfs -o mode=0755,size=256M tmpfs targetfs/tmp
+mount -t tmpfs -o mode=0755,size=64M  tmpfs targetfs/root
+mkdir -p packages
+mount --bind packages targetfs/var/cache/apt/archives
+echo 'nameserver 8.8.8.8' > targetfs/etc/resolv.conf 
+
+for p in $PIPACKAGES; do
+	chroot targetfs apt-get -y install $p
+done
+
+for d in dev proc sys tmp root var/cache/apt/archives ; do
+	umount targetfs/${d} 
+done
 
 # Build and install a kernel for Raspberry Pi 2
 
