@@ -11,7 +11,7 @@
 #
 # Reference of environment variables:
 #
-# PIDISTRO=vivid # Ubuntu release to debootstrap, use vivid, utopic or precise
+# PIDISTRO=vivid # Ubuntu release to debootstrap, use vivid, utopic, trusty or precise
 # PIPACKAGES="lubuntu-desktop language-support-de" # Additional packages to include
 # PITARGET=/dev/sdc # Path to a block device or name of a file - currently inactive
 # PISIZE=4000000000 # Size of the image to create, will be rounded down to full MB
@@ -24,6 +24,9 @@
 DEBOOTSTRAP=1.0.67
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
+fi
+if [ -z "$PIDISTRO" ] ; then
+	PIDISTRO="trusty" 
 fi
 
 me=` id -u `
@@ -103,18 +106,46 @@ if [ "$retval" -gt 0 ] ; then
 	exit 1
 fi
 
+# Prepare the disk image
+
 echo "OK, using loop device $FREELOOP"
 losetup $FREELOOP disk.img
 echo "OK, partitioning the device"
 parted -s $FREELOOP mklabel msdos
 parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
-parted -s $FREELOOP unit B mkpart primary ext2 67108864 '100%'
+parted -s $FREELOOP unit B mkpart primary ext2 67108864 75497471
+parted -s $FREELOOP unit B mkpart primary ext2 75497472 '100%'
 parted -s $FREELOOP unit B print
 echo "OK, creating device mappings"
 kpartx -s -v -a $FREELOOP
+if [ -b /dev/mapper/$( basename $FREELOOP )p1 ] ; then
+	echo "OK, mapped devices created"
+else
+	echo ':-( Device mapper is not working.'
+	losetup -d $FREELOOP 
+	exit 1
+fi
+
 echo "OK, creating filesystems"
 mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
-mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p2
+mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
+
+# Mount the disk image and install the base filesystem
+mkdir -p targetfs
+mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
+debootstrap --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
+
+# Build and install a kernel for Raspberry Pi 2
+
+# Build and install a kernel for Banana Pi M1
+
+# Build and install the bootloader for Raspberry Pi 2
+
+# Build and install U-Boot for Banana Pi M1
+
+# Install additional software
+
+# Add a user if requested
 
 # Clean up 
 for n in ` seq 1 9 ` ; do
