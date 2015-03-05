@@ -93,7 +93,14 @@ fi
 PIBLOCKS=$(( $PISIZE / 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
 dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
+modprobe -v loop 
 FREELOOP=` losetup -f `
+retval=$?
+if [ "$retval" -gt 0 ] ; then
+	echo ':-( No free loop device found.'
+	exit 1
+fi
+
 echo "OK, using loop device $FREELOOP"
 losetup $FREELOOP disk.img
 echo "OK, partitioning the device"
