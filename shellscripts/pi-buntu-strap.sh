@@ -146,6 +146,8 @@ if [ "$retval" -gt 0 ] ; then
 	exit 1
 fi
 
+# Install additional software
+
 # Build and install a kernel for Raspberry Pi 2
 
 # Build and install a kernel for Banana Pi M1
@@ -155,8 +157,6 @@ fi
 # Build and install U-Boot for Banana Pi M1
 
 # Install base configuration
-
-# Install additional software
 
 # Add a user if requested
 
