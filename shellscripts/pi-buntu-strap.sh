@@ -13,7 +13,7 @@
 #
 # PIDISTRO=vivid # Ubuntu release to debootstrap, use vivid, utopic or precise
 # PIPACKAGES="lubuntu-desktop language-support-de" # Additional packages to include
-# PITARGET=/dev/sdc # Path to a block device or name of a file 
+# PITARGET=/dev/sdc # Path to a block device or name of a file - currently inactive
 # PISIZE=4000000000 # Size of the image to create, will be rounded down to full MB
 # PISWAP=500000000  # Size of swap partition - currently inactive
 # PIHOSTNAME=pibuntu # Hostname to use
@@ -58,13 +58,13 @@ fi
 
 # Check for more programs
 
-progsneeded="gcc bc patch make mkimage git wget kpartx"
+progsneeded="gcc bc patch make mkimage git wget kpartx parted"
 for p in $progsneeded ; do
 	which $p
 	retval=$?
 	if [ "$retval" -gt 0 ] ; then
 		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted"
 		exit 1
 	else
 		echo "OK, found $p..."
@@ -92,8 +92,19 @@ fi
 
 PIBLOCKS=$(( $PISIZE / 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
+dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
+FREELOOP=` losetup -f `
+echo "OK, using loop device $FREELOOP"
+losetup $FREELOOP disk.img
+echo "OK, partitioning the device"
+parted -s $FREELOOP mklabel msdos
+parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
+parted -s $FREELOOP unit B mkpart primary ext2 67108864 '100%'
+parted -s $FREELOOP unit M print
+
 
 # Clean up 
+losetup -d $FREELOOP 
 umount /usr/share/debootstrap
 
 
