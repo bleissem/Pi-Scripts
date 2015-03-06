@@ -17,6 +17,11 @@
 # PISIZE=4000000000 # Size of the image to create, will be rounded down to full MB
 # PISWAP=500000000  # Size of swap partition - currently inactive
 # PIHOSTNAME=pibuntu # Hostname to use
+# PIXKBMODEL="pc105"
+# PIXKBLAYOUT="de"
+# PIXKBVARIANT=""
+# PIXKBOPTIONS=""
+# PILANG=en_us.UTF-8 # Set the default locale
 # PIUSER=mattias # Create an unprivileged user - leave empty to skip
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
@@ -29,6 +34,12 @@ if [ -z "$PISIZE" ] ; then
 fi
 if [ -z "$PIDISTRO" ] ; then
 	PIDISTRO="utopic" 
+fi
+if [ -z "$PILANG" ] ; then
+	PILANG="en_US.UTF-8" 
+fi
+if [ -z "$PISWAP" ] ; then
+	PISWAP="4194304" 
 fi
 
 me=` id -u `
@@ -98,6 +109,8 @@ fi
 # Calculate the size of the image
 
 PIBLOCKS=$(( $PISIZE / 1048576 ))
+SWAPBLOCKS=$(( $SWAPSIZE / 1048576 ))
+SWAPBYTES=$(( $SWAPBLOCKS * 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
 dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
 modprobe -v loop 
@@ -117,8 +130,8 @@ dd if=/dev/zero bs=1048576 count=128 of=$FREELOOP
 echo "OK, partitioning the device"
 parted -s $FREELOOP mklabel msdos
 parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
-parted -s $FREELOOP unit B mkpart primary ext2 67108864 75497471
-parted -s $FREELOOP unit B mkpart primary ext2 75497472 '100%'
+parted -s $FREELOOP unit B mkpart primary ext2 67108864 $(( 67108864 + $SWAPBYTES - 1 ))
+parted -s $FREELOOP unit B mkpart primary ext2 $(( 67108864 + $SWAPBYTES )) '100%'
 parted -s $FREELOOP unit B print
 echo "OK, creating device mappings"
 kpartx -s -v -a $FREELOOP
@@ -136,6 +149,7 @@ for n in 1 2 3 ; do
 	dd if=/dev/zero bs=1M count=8 of=/dev/mapper/$( basename $FREELOOP )p${n} 
 done 
 mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
+mkswap     /dev/mapper/$( basename $FREELOOP )p2
 mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 
 # Mount the disk image and install the base filesystem
@@ -151,7 +165,10 @@ if [ "$retval" -gt 0 ] ; then
 	read x
 fi
 
-# Configure /etc/fstab and console
+# Configure /etc/fstab
+
+install -m 0755 "${basedir}/configfiles/etc.fstab" targetfs/etc/fstab
+[ "$SWAPBLOCKS" -gt 63 ] && sed -i 's%#/dev/mmcblk0p2%/dev/mmcblk0p2%g' targetfs/etc/fstab
 
 # Build and install the bootloader for Raspberry Pi 2
 
@@ -187,6 +204,16 @@ cd ..
 
 # Install basic configuration
 
+install -m 0755 "${basedir}/configfiles/etc.default.keyboard" targetfs/etc/default/keyboard
+[ -n "$PIXKBMODEL" ] && echo 'XKBMODEL="'"$PIXKBMODEL"'"' >>  targetfs/etc/default/keyboard
+[ -n "$PIXKBVARIANT" ] && echo 'XKBVARIANT="'"$PIXKBVARIANT"'"' >>  targetfs/etc/default/keyboard
+[ -n "$PIXKBLAYOUT" ] && echo 'XKBLAYOUT="'"$PIXKBLAYOUT"'"' >>  targetfs/etc/default/keyboard
+[ -n "$PIXKBOPTIONS" ] && echo 'XKBOPTIONS="'"$PIXKBOPTIONS"'"' >>  targetfs/etc/default/keyboard
+echo 'LANG="'"$PILANG"'"' > targetfs/etc/default/locale
+echo 'LC_MESSAGES=POSIX' >> targetfs/etc/default/locale
+chmod 0755 targetfs/etc/default/locale
+install -m 0644 "${basedir}/configfiles/etc.network.interfaces.m1" targetfs/etc/network/interfaces
+
 # Install additional software
 
 mount --bind /dev targetfs/dev
@@ -208,13 +235,18 @@ for p in language-pack-en $PIPACKAGES; do
 	LC_ALL=POSIX chroot targetfs apt-get -y install $p
 done
 
+# Add a user if requested
+if [ -n "$PIUSER" ] ; then
+	LC_ALL=POSIX chroot targetfs adduser "$PIUSER"
+	for group in adm dialout lpadmin sudo ; do
+		LC_ALL=POSIX chroot targetfs usermod -aG $group "$PIUSER"
+	done
+fi
+
+# Clean up 
 for d in dev/pts dev proc sys tmp root var/cache/apt/archives ; do
 	umount targetfs/${d} 
 done
-
-# Add a user if requested
-
-# Clean up 
 umount targetfs/boot
 umount targetfs
 retval=$?
