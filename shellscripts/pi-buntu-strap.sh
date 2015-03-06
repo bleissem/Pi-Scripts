@@ -21,7 +21,7 @@
 # PIXKBLAYOUT="de"
 # PIXKBVARIANT=""
 # PIXKBOPTIONS=""
-# PILANG=en_us.UTF-8 # Set the default locale
+# PILANG=en_US.UTF-8 # Set the default locale
 # PIUSER=mattias # Create an unprivileged user - leave empty to skip
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
@@ -112,7 +112,7 @@ fi
 # Calculate the size of the image
 
 PIBLOCKS=$(( $PISIZE / 1048576 ))
-SWAPBLOCKS=$(( $SWAPSIZE / 1048576 ))
+SWAPBLOCKS=$(( $PISWAP / 1048576 ))
 SWAPBYTES=$(( $SWAPBLOCKS * 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
 dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
