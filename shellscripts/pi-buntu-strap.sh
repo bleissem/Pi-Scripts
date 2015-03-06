@@ -160,8 +160,12 @@ fi
 test -d u-boot || git clone http://git.denx.de/u-boot.git
 ( cd u-boot
 git pull
+make clean
 make Bananapi_config 
 make -j $( grep -c processor /proc/cpuinfo ) )
+mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr
+dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
+dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
 
 # Build and install a kernel for Raspberry Pi 2
 
@@ -175,7 +179,10 @@ cd linux-${KERNELMAJOR}
 yes '' | make oldconfig
 make -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
 INSTALL_MOD_PATH=../targetfs make modules_install
+install -m 0644 ../boot.scr ../targetfs/boot
+install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" ../targetfs/boot/boot.cmd
 install -m 0644 arch/arm/boot/uImage ../targetfs/boot
+install -m 0644 arch/arm/boot/dts/sun7i-a20-bananapi.dtb ../targetfs/boot
 cd ..
 
 # Install basic configuration
