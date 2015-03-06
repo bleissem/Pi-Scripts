@@ -102,13 +102,6 @@ test -f debootstrap_${DEBOOTSTRAP}_all.deb || \
 wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}_all.deb
 dpkg -i debootstrap_${DEBOOTSTRAP}_all.deb
 
-if debootstrap-${DEBOOTSTRAP}/debootstrap --help ; then
-	echo "OK, debootstrap works"
-else
-	umount /usr/share/debootstrap
-	exit 1
-fi
-
 # Calculate the size of the image
 
 PIBLOCKS=$(( $PISIZE / 1048576 ))
@@ -266,6 +259,3 @@ for n in ` seq 1 9 ` ; do
 	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
 done 
 losetup -d $FREELOOP 
-umount /usr/share/debootstrap
-
-
