@@ -170,6 +170,7 @@ install -m 0755 "${basedir}/configfiles/etc.fstab" targetfs/etc/fstab
 
 # Build and install U-Boot for Banana Pi M1
 
+
 test -d u-boot || git clone http://git.denx.de/u-boot.git
 ( cd u-boot
 git pull
@@ -179,6 +180,7 @@ make -j $( grep -c processor /proc/cpuinfo ) )
 mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr
 dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
 dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
+mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 
 # Build and install a kernel for Raspberry Pi 2
 
@@ -218,7 +220,6 @@ mount -t proc none targetfs/proc
 mount --bind /sys targetfs/sys
 mount -t tmpfs -o mode=0755,size=256M tmpfs targetfs/tmp
 mount -t tmpfs -o mode=0755,size=64M  tmpfs targetfs/root
-mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 mkdir -p packages
 mount --bind packages targetfs/var/cache/apt/archives
 echo 'nameserver 8.8.8.8' > targetfs/etc/resolv.conf 
