@@ -86,12 +86,7 @@ done
 
 test -f debootstrap_${DEBOOTSTRAP}_all.deb || \
 wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}_all.deb
-# wget http://ports.ubuntu.com/pool/main/d/debootstrap/debootstrap_${DEBOOTSTRAP}.tar.gz
 dpkg -i debootstrap_${DEBOOTSTRAP}_all.deb
-# test -f debootstrap_${DEBOOTSTRAP}.tar.gz && \
-# tar xzf debootstrap_${DEBOOTSTRAP}.tar.gz && \
-# mkdir -p /usr/share/debootstrap && \
-# mount --bind debootstrap-${DEBOOTSTRAP} /usr/share/debootstrap
 
 if debootstrap-${DEBOOTSTRAP}/debootstrap --help ; then
 	echo "OK, debootstrap works"
@@ -152,15 +147,21 @@ retval=$?
 
 if [ "$retval" -gt 0 ] ; then
 	echo ':-/ Oops debootstrap failed with exit code '"$retval"
-	# umount targetfs
-	# for n in ` seq 1 9 ` ; do
-	#	dmsetup remove /dev/mapper/$( basename $FREELOOP )p${n} > /dev/null 2>&1  
-	# done 
-	# losetup -d $FREELOOP 
-	# exit 1
+	echo 'Press enter to continue anyway.'
+	read x
 fi
 
 # Configure /etc/fstab and console
+
+# Build and install the bootloader for Raspberry Pi 2
+
+# Build and install U-Boot for Banana Pi M1
+
+test -d u-boot || git clone http://git.denx.de/u-boot.git
+( cd u-boot
+git pull
+make Bananapi_config 
+make -j $( grep -c processor /proc/cpuinfo ) )
 
 # Build and install a kernel for Raspberry Pi 2
 
@@ -176,12 +177,6 @@ make -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules 
 INSTALL_MOD_PATH=../targetfs make modules_install
 install -m 0644 arch/arm/boot/uImage ../targetfs/boot
 cd ..
-
-# Build and install the bootloader for Raspberry Pi 2
-
-# Build and install U-Boot for Banana Pi M1
-
-test -d 
 
 # Install basic configuration
 
