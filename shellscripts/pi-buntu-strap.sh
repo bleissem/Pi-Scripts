@@ -211,6 +211,7 @@ echo 'LANG="'"$PILANG"'"' > targetfs/etc/default/locale
 echo 'LC_MESSAGES=POSIX' >> targetfs/etc/default/locale
 chmod 0755 targetfs/etc/default/locale
 install -m 0644 "${basedir}/configfiles/etc.network.interfaces.m1" targetfs/etc/network/interfaces
+echo "$PIHOSTNAME" > targetfs/etc/hostname
 
 # Install additional software
 
