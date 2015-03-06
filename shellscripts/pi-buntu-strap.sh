@@ -166,15 +166,6 @@ fi
 install -m 0755 "${basedir}/configfiles/etc.fstab" targetfs/etc/fstab
 [ "$SWAPBLOCKS" -gt 63 ] && sed -i 's%#/dev/mmcblk0p2%/dev/mmcblk0p2%g' targetfs/etc/fstab
 
-# Build and install the bootloader for Raspberry Pi 2
-
-mkdir -p rpi2
-cd rpi2 
-test -d firmware || git clone https://github.com/raspberrypi/firmware
-cd firmware 
-git pull
-cd ../..
-
 # Build and install U-Boot for Banana Pi M1
 
 test -d u-boot || git clone http://git.denx.de/u-boot.git
@@ -188,6 +179,15 @@ dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
 dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
 mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 
+# Build and install the bootloader for Raspberry Pi 2
+
+mkdir -p rpi2
+cd rpi2 
+test -d firmware || git clone https://github.com/raspberrypi/firmware
+cd firmware 
+git pull
+cd ../..
+
 # Build and install a kernel for Raspberry Pi 2
 
 mkdir -p rpi2
@@ -200,7 +200,7 @@ install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" .config
 yes '' | make oldconfig
 make -j $( grep -c processor /proc/cpuinfo ) 
 make -j $( grep -c processor /proc/cpuinfo ) modules
-INSTALL_MOD_PATH=../targetfs make modules_install
+INSTALL_MOD_PATH=../../targetfs make modules_install
 cd ../..
 
 # Build and install a kernel for Banana Pi M1
