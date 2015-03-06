@@ -15,7 +15,7 @@
 # PIPACKAGES="lubuntu-desktop language-support-de" # Additional packages to include
 # PITARGET=/dev/sdc # Path to a block device or name of a file - currently inactive
 # PISIZE=4000000000 # Size of the image to create, will be rounded down to full MB
-# PISWAP=500000000  # Size of swap partition - currently inactive
+# PISWAP=500000000  # Size of swap partition
 # PIHOSTNAME=pibuntu # Hostname to use
 # PIXKBMODEL="pc105"
 # PIXKBLAYOUT="de"
@@ -40,6 +40,9 @@ if [ -z "$PILANG" ] ; then
 fi
 if [ -z "$PISWAP" ] ; then
 	PISWAP="4194304" 
+fi
+if [ -z "$PIHOSTNAME" ] ; then
+	PIHOSTNAME="pibuntu" 
 fi
 
 me=` id -u `
@@ -234,6 +237,10 @@ LC_ALL=POSIX chroot targetfs apt-get -y dist-upgrade
 for p in language-pack-en $PIPACKAGES; do
 	LC_ALL=POSIX chroot targetfs apt-get -y install $p
 done
+
+LC_ALL=POSIX chroot targetfs shadowconfig on
+echo 'Setting root password for your image:'
+LC_ALL=POSIX chroot targetfs passwd
 
 # Add a user if requested
 if [ -n "$PIUSER" ] ; then
