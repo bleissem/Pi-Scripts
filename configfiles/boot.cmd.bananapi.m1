@@ -1,0 +1,5 @@
+fatload mmc 0 0x46000000 uImage
+fatload mmc 0 0x49000000 sun7i-a20-bananapi.dtb
+setenv bootargs console=ttyS0,115200 console=tty0 root=/dev/mmcblk0p3 rw rootwait panic=10 ${extra}
+env set fdt_high ffffffff
+bootm 0x46000000 - 0x49000000
