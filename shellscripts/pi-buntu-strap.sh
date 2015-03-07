@@ -28,6 +28,7 @@
 
 DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
+KERNELPATCH=patch-3.19.1.xz
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
@@ -213,7 +214,16 @@ install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 
 test -f linux-${KERNELMAJOR}.tar.xz || \
 wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
-test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
+if [ -z "$KERNELPATCH" ] ; then
+	test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
+elif [ -f patch-${KERNELPATCH}.xz ] ; then
+	echo "OK, assuming patching done..."
+else
+	wget https://www.kernel.org/pub/linux/kernel/v3.x/patch-${KERNELPATCH}.xz
+	rm -rf linux-${KERNELMAJOR} 
+	tar xJf linux-${KERNELMAJOR}.tar.xz
+	( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELPATCH}.xz | patch -p1 )
+fi
 install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1" linux-${KERNELMAJOR}/.config
 cd linux-${KERNELMAJOR}
 yes '' | make oldconfig
