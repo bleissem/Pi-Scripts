@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Exit when no parted was found
+which parted || exit 1
+
+[ -f /.stretchfs ] || exit 1
+
+partinfo=` parted -s -m /dev/mmcblk0 unit B print | tail -n1 `
+partnum=` echo $partinfo | awk -F ':' '{print $1}' `
+partstart=` echo $partinfo | awk -F ':' '{print $2}' `
+[ -z "$partnum" ] && exit 1
+[ -z "$partstart" ] && exit 1
+
+# Stretch partition and reboot
+if [ -f /.stretchpart ] ; then
+	parted -s -m /dev/mmcblk0 unit B rm "$partnum"
+	parted -s -m /dev/mmcblk0 unit B mkpart primary ext2 "$partstart" '100%'
+	rm /.stretchpart
+	sync
+	reboot
+	exit 0
+fi
+
+# Online resize and reboot
+resize2fs /dev/mmcblk0p${partnum}
+rm /.stretchfs
+sync
+reboot
+exit 0
