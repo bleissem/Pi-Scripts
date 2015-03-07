@@ -84,13 +84,13 @@ fi
 
 # Check for more programs
 
-progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4"
+progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4 lsof"
 for p in $progsneeded ; do
 	which $p
 	retval=$?
 	if [ "$retval" -gt 0 ] ; then
 		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof"
 		exit 1
 	else
 		echo "OK, found $p..."
@@ -292,6 +292,7 @@ if [ -n "$PIUSER" ] ; then
 fi
 
 # Clean up 
+kill -9 ` lsof | grep targetfs | awk '{print $2}' | uniq `
 for d in dev/pts dev proc sys tmp root var/cache/apt/archives ; do
 	umount targetfs/${d} 
 done
