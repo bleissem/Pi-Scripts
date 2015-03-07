@@ -187,6 +187,11 @@ test -d firmware || git clone https://github.com/raspberrypi/firmware
 cd firmware 
 git pull
 cd ../..
+for f in bcm2709-rpi-2-b.dtb bootcode.bin fixup.dat start.elf \
+	cmdline.txt config.txt ; do
+	install -m 0644 rpi2/firmware/boot/${f} targetfs/boot/
+done
+sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 
 # Build and install a kernel for Raspberry Pi 2
 
@@ -202,6 +207,7 @@ make -j $( grep -c processor /proc/cpuinfo )
 make -j $( grep -c processor /proc/cpuinfo ) modules
 INSTALL_MOD_PATH=../../targetfs make modules_install
 cd ../..
+install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 
 # Build and install a kernel for Banana Pi M1
 
