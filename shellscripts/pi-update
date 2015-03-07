@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if which git ; then
+	mkdir -p /usr/src
+	( cd /usr/src ; git clone https://github.com/mschlenker/Pi-Scripts ) 
+else
+	echo 'Please install git, then run this script again!'
+	exit 1
+fi
+
+if [ -f /usr/src/Pi-Scripts/shellscripts/updater.sh ] ; then
+	( cd /usr/src/Pi-Scripts ; git pull )
+	exec bash /usr/src/Pi-Scripts/shellscripts/updater.sh
+else
+	echo 'Update script not found, please try again later!'
+	exit 1
+fi

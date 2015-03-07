@@ -1,5 +1,8 @@
 #!/bin/bash
 
+PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+export PATH
+
 # Exit when no parted was found
 which parted || exit 1
 
@@ -15,7 +18,7 @@ partstart=` echo $partinfo | awk -F ':' '{print $2}' `
 if [ -f /.stretchpart ] ; then
 	parted -s -m /dev/mmcblk0 unit B rm "$partnum"
 	parted -s -m /dev/mmcblk0 unit B mkpart primary ext2 "$partstart" '100%'
-	rm /.stretchpart
+	rm -f /.stretchpart
 	sync
 	reboot
 	exit 0
@@ -23,7 +26,7 @@ fi
 
 # Online resize and reboot
 resize2fs /dev/mmcblk0p${partnum}
-rm /.stretchfs
+rm -f /.stretchfs
 sync
 reboot
 exit 0

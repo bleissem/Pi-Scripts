@@ -232,6 +232,17 @@ chmod 0755 targetfs/etc/default/locale
 install -m 0644 "${basedir}/configfiles/etc.network.interfaces.m1" targetfs/etc/network/interfaces
 echo "$PIHOSTNAME" > targetfs/etc/hostname
 
+# Install Pi-Scripts - FIME, move this to a debian package
+install -m 0755 "${basedir}/shellscripts/pi-firstrun" targetfs/usr/sbin
+install -m 0755 "${basedir}/shellscripts/pi-stretch" targetfs/usr/sbin
+install -m 0755 "${basedir}/shellscripts/pi-update" targetfs/usr/sbin
+sed -i 's%exit 0%# exit 0%g' "${basedir}/etc/rc.local"
+echo '/usr/sbin/pi-firstrun' >> "${basedir}/etc/rc.local"
+echo 'exit 0' >> "${basedir}/etc/rc.local"
+for f in .stretchfs .stretchpart .firstrun ; do
+	touch "${basedir}/${f}"
+done
+
 # Install additional software
 
 mount --bind /dev targetfs/dev

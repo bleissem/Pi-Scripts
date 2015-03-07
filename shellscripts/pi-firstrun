@@ -1,0 +1,6 @@
+#!/bin/bash
+
+/usr/sbin/pi-stretch
+[ -f /.firstrun ] || exit 0
+# actions go here...
+exit 0
