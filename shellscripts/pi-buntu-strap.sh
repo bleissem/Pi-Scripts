@@ -149,6 +149,45 @@ mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
 mkswap     /dev/mapper/$( basename $FREELOOP )p2
 mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 
+# Download and unpack necessary stuff:
+#
+
+# u-boot for Banana Pi
+
+test -d u-boot || git clone http://git.denx.de/u-boot.git
+( cd u-boot ; git pull )
+
+# Bootloader/Firmware for Raspberry Pi 2
+
+mkdir -p rpi2
+( cd rpi2 
+test -d firmware || git clone https://github.com/raspberrypi/firmware
+cd firmware 
+git pull )
+
+# Kernel for Banana Pi
+
+test -f linux-${KERNELMAJOR}.tar.xz || \
+wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
+if [ -z "$KERNELPATCH" ] ; then
+	test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
+elif [ -f patch-${KERNELPATCH}.xz ] ; then
+	echo "OK, assuming patching done..."
+else
+	wget https://www.kernel.org/pub/linux/kernel/v3.x/patch-${KERNELPATCH}.xz
+	rm -rf linux-${KERNELMAJOR} 
+	tar xJf linux-${KERNELMAJOR}.tar.xz
+	( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELPATCH}.xz | patch -p1 )
+fi
+
+# Kernel for Raspberry Pi
+
+( cd rpi2 
+test -d linux || git clone https://github.com/raspberrypi/linux
+cd linux 
+git pull
+git checkout rpi-3.18.y )
+
 # Mount the disk image and install the base filesystem
 mkdir -p targetfs
 mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
@@ -169,12 +208,9 @@ install -m 0755 "${basedir}/configfiles/etc.fstab" targetfs/etc/fstab
 
 # Build and install U-Boot for Banana Pi M1
 
-test -d u-boot || git clone http://git.denx.de/u-boot.git
-( cd u-boot
-git pull
-make clean
-make Bananapi_config 
-make -j $( grep -c processor /proc/cpuinfo ) )
+make -C u-boot clean
+make -C u-boot Bananapi_config 
+make -C u-boot -j $( grep -c processor /proc/cpuinfo ) 
 mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr
 dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
 dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
@@ -182,13 +218,9 @@ mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 
 # Build and install the bootloader for Raspberry Pi 2
 
-mkdir -p rpi2
-cd rpi2 
-test -d firmware || git clone https://github.com/raspberrypi/firmware
-cd firmware 
-git pull
-cd ../..
-for f in bcm2709-rpi-2-b.dtb bootcode.bin fixup.dat start.elf \
+for f in bcm2709-rpi-2-b.dtb bootcode.bin \
+	fixup.dat fixup_cd.dat fixup_x.dat \
+	start.elf start_cd.elf start_x.elf \
 	cmdline.txt config.txt ; do
 	install -m 0644 rpi2/firmware/boot/${f} targetfs/boot/
 done
@@ -196,34 +228,15 @@ sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 
 # Build and install a kernel for Raspberry Pi 2
 
-mkdir -p rpi2
-cd rpi2 
-test -d linux || git clone https://github.com/raspberrypi/linux
-cd linux 
-git pull
-git checkout rpi-3.18.y
-install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" .config
-yes '' | make oldconfig
-make -j $( grep -c processor /proc/cpuinfo ) 
-make -j $( grep -c processor /proc/cpuinfo ) modules
-INSTALL_MOD_PATH=../../targetfs make modules_install
-cd ../..
+install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" rpi2/linux/.config
+yes '' | make -C rpi2/linux oldconfig
+make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) 
+make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules
+INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install 
 install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 
 # Build and install a kernel for Banana Pi M1
 
-test -f linux-${KERNELMAJOR}.tar.xz || \
-wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
-if [ -z "$KERNELPATCH" ] ; then
-	test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
-elif [ -f patch-${KERNELPATCH}.xz ] ; then
-	echo "OK, assuming patching done..."
-else
-	wget https://www.kernel.org/pub/linux/kernel/v3.x/patch-${KERNELPATCH}.xz
-	rm -rf linux-${KERNELMAJOR} 
-	tar xJf linux-${KERNELMAJOR}.tar.xz
-	( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELPATCH}.xz | patch -p1 )
-fi
 install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1" linux-${KERNELMAJOR}/.config
 cd linux-${KERNELMAJOR}
 yes '' | make oldconfig
