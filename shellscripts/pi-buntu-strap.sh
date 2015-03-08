@@ -239,16 +239,14 @@ install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 
 # Build and install a kernel for Banana Pi M1
 
-install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1" linux-${KERNELMAJOR}/.config
-cd linux-${KERNELMAJOR}
-yes '' | make oldconfig
-make -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
-INSTALL_MOD_PATH=../targetfs make modules_install
-install -m 0644 ../boot.scr ../targetfs/boot
-install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" ../targetfs/boot/boot.cmd
-install -m 0644 arch/arm/boot/uImage ../targetfs/boot
-install -m 0644 arch/arm/boot/dts/sun7i-a20-bananapi.dtb ../targetfs/boot
-cd ..
+install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1.testing" linux-${KERNELMAJOR}/.config
+yes '' | make -C linux-${KERNELMAJOR} oldconfig
+make -C linux-${KERNELMAJOR} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
+( cd linux-${KERNELMAJOR} ; INSTALL_MOD_PATH=../targetfs make modules_install )
+install -m 0644 boot.scr targetfs/boot
+install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd
+install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/uImage targetfs/boot
+install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
 
 # Install basic configuration
 
