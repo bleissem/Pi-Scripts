@@ -252,11 +252,11 @@ echo "$PIHOSTNAME" > targetfs/etc/hostname
 install -m 0755 "${basedir}/shellscripts/pi-firstrun" targetfs/usr/sbin
 install -m 0755 "${basedir}/shellscripts/pi-stretch" targetfs/usr/sbin
 install -m 0755 "${basedir}/shellscripts/pi-update" targetfs/usr/sbin
-sed -i 's%exit 0%# exit 0%g' "${basedir}/etc/rc.local"
-echo '/usr/sbin/pi-firstrun' >> "${basedir}/etc/rc.local"
-echo 'exit 0' >> "${basedir}/etc/rc.local"
+sed -i 's%exit 0%# exit 0%g' "targetfs/etc/rc.local"
+echo '/usr/sbin/pi-firstrun' >> "targetfs/etc/rc.local"
+echo 'exit 0' >> "targetfs/etc/rc.local"
 for f in .stretchfs .stretchpart .firstrun ; do
-	touch "${basedir}/${f}"
+	touch "targetfs/${f}"
 done
 
 # Install additional software
