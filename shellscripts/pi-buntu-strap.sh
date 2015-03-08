@@ -220,9 +220,11 @@ mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 
 for f in bcm2709-rpi-2-b.dtb bootcode.bin \
 	fixup.dat fixup_cd.dat fixup_x.dat \
-	start.elf start_cd.elf start_x.elf \
-	cmdline.txt config.txt ; do
+	start.elf start_cd.elf start_x.elf ; do
 	install -m 0644 rpi2/firmware/boot/${f} targetfs/boot/
+done
+for f in cmdline.txt config.txt ; do
+	install -m 0644 "${basedir}/configfiles/${f}.raspberrypi.2" targetfs/boot/${f}
 done
 sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 
