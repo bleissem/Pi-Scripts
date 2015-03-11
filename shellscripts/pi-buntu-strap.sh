@@ -259,6 +259,11 @@ echo 'LC_MESSAGES=POSIX' >> targetfs/etc/default/locale
 chmod 0755 targetfs/etc/default/locale
 install -m 0644 "${basedir}/configfiles/etc.network.interfaces.m1" targetfs/etc/network/interfaces
 echo "$PIHOSTNAME" > targetfs/etc/hostname
+# FIXME: This seems to fit upstart only
+if [ -f "targetfs/etc/init/tty1.conf" ] ; then
+	cp -v targetfs/etc/init/{tty1,ttyS0}.conf
+	sed -i 's/tty1/ttyS0/g' targetfs/etc/init/ttyS0.conf
+fi
 
 # Install Pi-Scripts - FIME, move this to a debian package
 install -m 0755 "${basedir}/shellscripts/pi-firstrun" targetfs/usr/sbin
