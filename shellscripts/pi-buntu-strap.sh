@@ -28,7 +28,7 @@
 
 DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
-KERNELPATCH=3.19.1
+KERNELPATCH=3.19.2
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
@@ -293,7 +293,7 @@ sed -i 's/UBUNTUCODENAME/'${PIDISTRO}'/g' targetfs/etc/apt/sources.list
 LC_ALL=POSIX chroot targetfs apt-get update
 LC_ALL=POSIX chroot targetfs apt-get -y dist-upgrade
 
-for p in language-pack-en $PIPACKAGES; do
+for p in language-pack-en vlan parted $PIPACKAGES; do
 	LC_ALL=POSIX chroot targetfs apt-get -y install $p
 done
 
