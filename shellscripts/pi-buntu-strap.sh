@@ -30,6 +30,7 @@ DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
 KERNELPATCH=3.19.2
 KPATCHES="linux-3.19-b53.patch"
+XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan"
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
@@ -269,6 +270,10 @@ if [ -f "targetfs/etc/init/tty1.conf" ] ; then
 	cp -v targetfs/etc/init/{tty1,ttyS0}.conf
 	sed -i 's/tty1/ttyS0/g' targetfs/etc/init/ttyS0.conf
 fi
+# Extra modules
+for m in $XTRAMODULES ; do
+	echo "${m}" >> targetfs/etc/modules 
+done
 
 # Install Pi-Scripts - FIME, move this to a debian package
 install -m 0755 "${basedir}/shellscripts/pi-firstrun" targetfs/usr/sbin

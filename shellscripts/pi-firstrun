@@ -2,5 +2,10 @@
 
 /usr/sbin/pi-stretch
 [ -f /.firstrun ] || exit 0
-# actions go here...
+if dmesg | grep b53 | grep -q 'found switch' ; then
+	echo 'Detected Banana Pi R1, installing base network config'
+	
+	rm /.firstrun
+	reboot
+fi
 exit 0
