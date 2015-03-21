@@ -29,6 +29,7 @@
 DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
 KERNELPATCH=3.19.2
+KPATCHES="linux-3.19-b53.patch"
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
@@ -169,6 +170,7 @@ git pull )
 
 test -f linux-${KERNELMAJOR}.tar.xz || \
 wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
+
 if [ -z "$KERNELPATCH" ] ; then
 	test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
 elif [ -f patch-${KERNELPATCH}.xz ] ; then
@@ -178,6 +180,9 @@ else
 	rm -rf linux-${KERNELMAJOR} 
 	tar xJf linux-${KERNELMAJOR}.tar.xz
 	( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELPATCH}.xz | patch -p1 )
+	for f in $KPATCHES ; do
+		( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
+	done
 fi
 
 # Kernel for Raspberry Pi
