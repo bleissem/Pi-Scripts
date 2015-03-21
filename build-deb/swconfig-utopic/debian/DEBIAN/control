@@ -1,0 +1,8 @@
+Package: swconfig
+Version: 20140321-1
+Section: base
+Priority: optional
+Architecture: armhf
+Depends: bash
+Maintainer: Mattias Schlenker <ms@mattiasschlenker.de>
+Description: swconfig from OpenWRT to manage the b53 switch on Banana Pi R1
