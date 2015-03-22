@@ -53,6 +53,10 @@ if [ "$me" -gt 0 ] ; then
 	echo 'Please run this script with root privileges!'
 	exit 1
 fi
+if echo "$0" | grep -q -v '^/' ; then
+	echo 'Please run this with absolute pathnames!'
+	exit 1
+fi
 
 # Find out the basedir
 
@@ -185,8 +189,7 @@ else
 		( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
 	done
 fi
-
-exit 0
+exit 1
 
 # Kernel for Raspberry Pi
 
