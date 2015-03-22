@@ -189,7 +189,6 @@ else
 		( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
 	done
 fi
-exit 1
 
 # Kernel for Raspberry Pi
 
