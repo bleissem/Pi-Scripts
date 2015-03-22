@@ -186,6 +186,8 @@ else
 	done
 fi
 
+exit 0
+
 # Kernel for Raspberry Pi
 
 ( cd rpi2 
