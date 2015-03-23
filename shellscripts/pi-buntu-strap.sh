@@ -23,6 +23,7 @@
 # PIXKBOPTIONS=""
 # PILANG=en_US.UTF-8 # Set the default locale
 # PIUSER=mattias # Create an unprivileged user - leave empty to skip
+# PIXTRADEBS="/path/to/package.deb" # space separated list of extra debs to install
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
@@ -309,6 +310,10 @@ LC_ALL=POSIX chroot targetfs apt-get -y dist-upgrade
 
 for p in language-pack-en vlan parted $PIPACKAGES; do
 	LC_ALL=POSIX chroot targetfs apt-get -y install $p
+done
+for p in $PIXTRADEBS ; do
+	install -m 0644 ${p} packages/
+	LC_ALL=POSIX chroot targetfs dpkg -i /var/cache/apt/archives/` basename $p `
 done
 
 LC_ALL=POSIX chroot targetfs shadowconfig on
