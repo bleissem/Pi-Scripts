@@ -13,3 +13,7 @@ iface eth0.102 inet static
        netmask 255.255.255.0
 #        gateway 10.0.1.2
 #        dns-nameservers 8.8.8.8
+
+# leave the WiFi interface unconfigured, but bring it up
+auto wlan0
+iface wlan0 inet manual

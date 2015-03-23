@@ -32,6 +32,7 @@ KERNELMAJOR=3.19
 KERNELPATCH=3.19.2
 KPATCHES="linux-3.19-b53.patch"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan"
+MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen"
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
@@ -274,6 +275,7 @@ for t in r1 m1 ; do
 	install -m 0644 "${basedir}/configfiles/etc.network.interfaces.${t}" \
 		"targetfs/etc/bananapi/network.interfaces.${t}"
 done
+install -m 0644 "${basedir}/etc.if-pre-up.d.swconfig.r1" targetfs/etc/bananapi/if-pre-up.d.swconfig.r1
 
 echo "$PIHOSTNAME" > targetfs/etc/hostname
 # FIXME: This seems to fit upstart only
@@ -314,7 +316,7 @@ sed -i 's/UBUNTUCODENAME/'${PIDISTRO}'/g' targetfs/etc/apt/sources.list
 LC_ALL=POSIX chroot targetfs apt-get update
 LC_ALL=POSIX chroot targetfs apt-get -y dist-upgrade
 
-for p in language-pack-en vlan parted $PIPACKAGES; do
+for p in $MINPACKAGES $PIPACKAGES; do
 	LC_ALL=POSIX chroot targetfs apt-get -y install $p
 done
 for p in $PIXTRADEBS ; do

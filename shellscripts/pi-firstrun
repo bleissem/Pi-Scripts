@@ -3,7 +3,7 @@
 bold=''
 
 # Create keys for ssh 
-if -x /usr/sbin/sshd ; then
+if [ -x /usr/sbin/sshd ] ; then
 	if [ -f /etc/ssh/ssh_host_dsa_key ] ; then
 		printf "$bold---> Skipping DSA key $normal\n"
         else
@@ -30,6 +30,7 @@ fi
 if dmesg | grep b53 | grep -q 'found switch' ; then
 	echo 'Detected Banana Pi R1, installing base network config'
 	install -m 0644 /etc/bananapi/network.interfaces.r1 /etc/network/interfaces
+	install -m 0755 /etc/bananapi/if-pre-up.d.swconfig.r1 /etc/network/if-pre-up.d/swconfig
 	rm /.firstrun
 	reboot
 fi
