@@ -16,10 +16,9 @@ partstart=` echo $partinfo | awk -F ':' '{print $2}' `
 
 # Stretch partition and reboot
 if [ -f /.stretchpart ] ; then
-	parted -s -m /dev/mmcblk0 unit B rm "$partnum"
-	parted -s -m /dev/mmcblk0 unit B mkpart primary ext2 "$partstart" '100%'
-	rm -f /.stretchpart
+	parted -s -m /dev/mmcblk0 unit B resizepart "$partnum" '100%'
 	sync
+	sleep 1
 	reboot
 	exit 0
 fi
