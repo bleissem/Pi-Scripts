@@ -32,7 +32,7 @@ KERNELMAJOR=3.19
 KERNELPATCH=3.19.2
 KPATCHES="linux-3.19-b53.patch"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan"
-MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen"
+MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen iw"
 
 if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
