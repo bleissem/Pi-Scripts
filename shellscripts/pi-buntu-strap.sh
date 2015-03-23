@@ -269,6 +269,12 @@ echo 'LANG="'"$PILANG"'"' > targetfs/etc/default/locale
 echo 'LC_MESSAGES=POSIX' >> targetfs/etc/default/locale
 chmod 0755 targetfs/etc/default/locale
 install -m 0644 "${basedir}/configfiles/etc.network.interfaces.m1" targetfs/etc/network/interfaces
+mkdir -p targetfs/etc/bananapi
+for t in r1 m1 ; do
+	install -m 0644 "${basedir}/configfiles/etc.network.interfaces.${t}" \
+		"targetfs/etc/bananapi/network.interfaces.${t}"
+done
+
 echo "$PIHOSTNAME" > targetfs/etc/hostname
 # FIXME: This seems to fit upstart only
 if [ -f "targetfs/etc/init/tty1.conf" ] ; then
@@ -330,6 +336,9 @@ fi
 
 # Clean up 
 kill -9 ` lsof | grep targetfs | awk '{print $2}' | uniq `
+# Remove SSH keys
+rm -f targetfs/etc/ssh/ssh_host_*
+
 for d in dev/pts dev proc sys tmp root var/cache/apt/archives ; do
 	umount targetfs/${d} 
 done

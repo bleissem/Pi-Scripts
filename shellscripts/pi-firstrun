@@ -1,10 +1,35 @@
 #!/bin/bash
 
+bold=''
+
+# Create keys for ssh 
+if -x /usr/sbin/sshd ; then
+	if [ -f /etc/ssh/ssh_host_dsa_key ] ; then
+		printf "$bold---> Skipping DSA key $normal\n"
+        else
+		ssh-keygen -N '' -t dsa -f /etc/ssh/ssh_host_dsa_key
+        fi
+        if [ -f /etc/ssh/ssh_host_rsa_key ] ; then
+		printf "$bold---> Skipping RSA key $normal\n"
+        else
+		ssh-keygen -N '' -t rsa -f /etc/ssh/ssh_host_rsa_key
+        fi
+        if [ -f /etc/ssh/ssh_host_ecdsa_key ] ; then
+		printf "$bold---> Skipping ECDSA key $normal\n"
+        else
+		ssh-keygen -N '' -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key
+        fi
+        if [ -f /etc/ssh/ssh_host_ed25519_key ] ; then
+		printf "$bold---> Skipping ED25519 key $normal\n"
+        else
+		ssh-keygen -N '' -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
+        fi
+fi
 /usr/sbin/pi-stretch
 [ -f /.firstrun ] || exit 0
 if dmesg | grep b53 | grep -q 'found switch' ; then
 	echo 'Detected Banana Pi R1, installing base network config'
-	
+	install -m 0644 /etc/bananapi/network.interfaces.r1 /etc/network/interfaces
 	rm /.firstrun
 	reboot
 fi

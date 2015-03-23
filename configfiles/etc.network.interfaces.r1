@@ -1,0 +1,15 @@
+auto lo
+iface lo inet loopback
+
+auto eth0.101
+auto eth0.102
+
+# dhcp configuration on the single port
+iface eth0.101 inet dhcp
+
+# static ip configuration on the four port switch
+iface eth0.102 inet static
+       address 10.0.1.1
+       netmask 255.255.255.0
+#        gateway 10.0.1.2
+#        dns-nameservers 8.8.8.8
