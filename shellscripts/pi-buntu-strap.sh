@@ -65,45 +65,54 @@ fi
 basedir=` dirname "$0" `
 basedir=` dirname "$basedir" `
 
-# Check the architecture we are running on
+####### Define some functions
 
-case ` uname -m ` in
-	armv7l )
-		echo "OK, running on ARMv7..."
-		echo "Called as $0"
-	;;
-	* )
-		echo ':-( Cross compiling the kernel and bootloader is not yet supported'
-		echo 'Please run this script on a proper ARMv7 board (Raspberry Pi 2, Banana Pi)'
-		exit 1
-	;;
-esac
+# Check the architecture we are running on
+function check_arch {
+	case ` uname -m ` in
+		armv7l )
+			echo "OK, running on ARMv7..."
+			echo "Called as $0"
+		;;
+		* )
+			echo ':-( Cross compiling the kernel and bootloader is not yet supported'
+			echo 'Please run this script on a proper ARMv7 board (Raspberry Pi 2, Banana Pi)'
+			exit 1
+		;;
+	esac
+}
 
 # Check for some programs that are needed
-
-if which dpkg ; then
-	echo "OK, found dpkg..."
-elif [ "$IGNOREDPKG" -gt 0 ] ; then
-	echo "OK, ignoring dpkg..."
-else
-	echo ':-( Dpkg was not found, this script is not yet tested on non-debian distributions'
-	exit 1
-fi
+function check_dpkg {
+	if which dpkg ; then
+		echo "OK, found dpkg..."
+	elif [ "$IGNOREDPKG" -gt 0 ] ; then
+		echo "OK, ignoring dpkg..."
+	else
+		echo ':-( Dpkg was not found, this script is not yet tested on non-debian distributions'
+		exit 1
+	fi
+}
 
 # Check for more programs
+function check_progs {
+	progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4 lsof ruby"
+	for p in $progsneeded ; do
+		which $p
+		retval=$?
+		if [ "$retval" -gt 0 ] ; then
+			echo "$p is missing. Please install dependencies:"
+			echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof ruby2.0"
+			exit 1
+		else
+			echo "OK, found $p..."
+		fi
+	done
+}
 
-progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4 lsof"
-for p in $progsneeded ; do
-	which $p
-	retval=$?
-	if [ "$retval" -gt 0 ] ; then
-		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof ruby2.0"
-		exit 1
-	else
-		echo "OK, found $p..."
-	fi
-done
+check_arch
+check_dpkg
+check_progs
 
 # Download and install debootstrap:
 
@@ -265,7 +274,7 @@ install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/uImage targetfs/boot
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
 KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
-ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${LOCALVERS} targetfs
+ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${KLOCALVERS} targetfs
 
 # Install basic configuration
 
