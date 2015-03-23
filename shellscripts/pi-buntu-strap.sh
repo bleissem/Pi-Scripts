@@ -275,7 +275,7 @@ for t in r1 m1 ; do
 	install -m 0644 "${basedir}/configfiles/etc.network.interfaces.${t}" \
 		"targetfs/etc/bananapi/network.interfaces.${t}"
 done
-install -m 0644 "${basedir}/etc.if-pre-up.d.swconfig.r1" targetfs/etc/bananapi/if-pre-up.d.swconfig.r1
+install -m 0644 "${basedir}/configfiles/etc.if-pre-up.d.swconfig.r1" targetfs/etc/bananapi/if-pre-up.d.swconfig.r1
 
 echo "$PIHOSTNAME" > targetfs/etc/hostname
 # FIXME: This seems to fit upstart only
