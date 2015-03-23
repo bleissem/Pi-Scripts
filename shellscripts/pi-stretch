@@ -14,9 +14,15 @@ partstart=` echo $partinfo | awk -F ':' '{print $2}' `
 [ -z "$partnum" ] && exit 1
 [ -z "$partstart" ] && exit 1
 
+# FIXME, probably will not work in 14.10
 # Stretch partition and reboot
 if [ -f /.stretchpart ] ; then
-	parted -s -m /dev/mmcblk0 unit B resizepart "$partnum" '100%'
+	# parted -s -m /dev/mmcblk0 unit B resizepart "$partnum" '100%'
+	parted -s -m /dev/mmcblk0 unit B rm "$partnum"
+	sync 
+	sleep 1
+	parted -s -m /dev/mmcblk0 unit B mkpart primary ext2 "$partstart" '100%' 
+	rm -f /.stretchpart
 	sync
 	sleep 1
 	reboot

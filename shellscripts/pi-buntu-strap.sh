@@ -193,12 +193,18 @@ else
 fi
 
 # Kernel for Raspberry Pi
-
 ( cd rpi2 
 test -d linux || git clone https://github.com/raspberrypi/linux
 cd linux 
 git pull
 git checkout rpi-3.18.y )
+
+# Linux Firmware
+if [ -d linux-firmware ] ; then
+	( cd linux-firmware ; git pull )
+else
+	git clone git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
+fi
 
 # Mount the disk image and install the base filesystem
 mkdir -p targetfs
