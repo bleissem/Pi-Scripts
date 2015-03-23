@@ -98,7 +98,7 @@ for p in $progsneeded ; do
 	retval=$?
 	if [ "$retval" -gt 0 ] ; then
 		echo "$p is missing. Please install dependencies:"
-		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof"
+		echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof ruby2.0"
 		exit 1
 	else
 		echo "OK, found $p..."
@@ -264,6 +264,8 @@ install -m 0644 boot.scr targetfs/boot
 install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/uImage targetfs/boot
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
+KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
+ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${LOCALVERS} targetfs
 
 # Install basic configuration
 
