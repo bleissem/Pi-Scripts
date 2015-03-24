@@ -287,6 +287,8 @@ CURRENTPWD=` pwd `
 make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
 make -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time' INSTALL_MOD_PATH=targetfs modules_install
 
+exit 0
+
 # Install firmware
 
 KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
