@@ -2,6 +2,11 @@
 
 bold=''
 
+# Run depmod
+if [ -f /.rundepmod ] ; then
+	depmod -a && rm /.rundepmod
+fi
+
 # Create keys for ssh 
 if [ -x /usr/sbin/sshd ] ; then
 	if [ -f /etc/ssh/ssh_host_dsa_key ] ; then

@@ -334,7 +334,7 @@ echo '' >> "targetfs/etc/rc.local"
 sed -i 's%exit 0%# exit 0%g' "targetfs/etc/rc.local"
 echo '/usr/sbin/pi-firstrun' >> "targetfs/etc/rc.local"
 echo 'exit 0' >> "targetfs/etc/rc.local"
-for f in .stretchfs .stretchpart .firstrun ; do
+for f in .stretchfs .stretchpart .firstrun .rundepmod ; do
 	touch "targetfs/${f}"
 done
 
