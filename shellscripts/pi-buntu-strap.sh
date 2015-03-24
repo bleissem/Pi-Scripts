@@ -31,7 +31,8 @@ DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
 KERNELPATCH=3.19.2
 KPATCHES="linux-3.19-b53.patch"
-XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan"
+XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan 8192"
+BLACKLIST="rtl8192cu"
 MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen iw"
 
 if [ -z "$PISIZE" ] ; then
@@ -183,7 +184,6 @@ cd firmware
 git pull )
 
 # Kernel for Banana Pi
-
 test -f linux-${KERNELMAJOR}.tar.xz || \
 wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
 
@@ -199,6 +199,13 @@ else
 	for f in $KPATCHES ; do
 		( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
 	done
+fi
+
+# RTL8192 for Banana Pi
+if [ -d rt8192cu ] ; then
+	( cd rt8192cu ; git pull )
+else
+	git clone https://github.com/dz0ny/rt8192cu.git
 fi
 
 # Kernel for Raspberry Pi
@@ -273,6 +280,15 @@ install -m 0644 boot.scr targetfs/boot
 install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/uImage targetfs/boot
 install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
+
+# Build and install the rt8192cu module for Banana Pi R1
+
+CURRENTPWD=` pwd `
+make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
+make -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time' INSTALL_MOD_PATH=targetfs modules_install
+
+# Install firmware
+
 KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
 ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${KLOCALVERS} targetfs
 
@@ -303,6 +319,11 @@ fi
 # Extra modules
 for m in $XTRAMODULES ; do
 	echo "${m}" >> targetfs/etc/modules 
+done
+for m in $BLACKLIST ; do
+	echo '' >> targetfs/etc/modprobe.d/blacklist.conf
+	echo '# blacklisted by pibuntu script' >> targetfs/etc/modprobe.d/blacklist.conf
+	echo "blacklist $m" >> targetfs/etc/modprobe.d/blacklist.conf
 done
 
 # Install Pi-Scripts - FIME, move this to a debian package
