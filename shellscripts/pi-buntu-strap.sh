@@ -284,13 +284,12 @@ install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb ta
 # Build and install the rt8192cu module for Banana Pi R1
 
 CURRENTPWD=` pwd `
+KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
 make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
 mkdir -p targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra 
 install -m 0644 rt8192cu/8192cu.ko targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra/ 
 
 # Install firmware
-
-KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
 ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${KLOCALVERS} targetfs
 
 # Install basic configuration
