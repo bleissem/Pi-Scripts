@@ -285,9 +285,8 @@ install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb ta
 
 CURRENTPWD=` pwd `
 make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
-make -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time' INSTALL_MOD_PATH=targetfs modules_install
-
-exit 0
+mkdir -p targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra 
+install -m 0644 rt8192cu/8192cu.ko targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra/ 
 
 # Install firmware
 
