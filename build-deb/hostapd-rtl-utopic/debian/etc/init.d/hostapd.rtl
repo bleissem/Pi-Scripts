@@ -1,28 +1,28 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:		hostapd
+# Provides:		hostapd.rtl
 # Required-Start:	$remote_fs
 # Required-Stop:	$remote_fs
 # Should-Start:		$network
 # Should-Stop:
 # Default-Start:	2 3 4 5
 # Default-Stop:		0 1 6
-# Short-Description:	Advanced IEEE 802.11 management daemon
+# Short-Description:	Advanced IEEE 802.11 management daemon (patched for Realtek)
 # Description:		Userspace IEEE 802.11 AP and IEEE 802.1X/WPA/WPA2/EAP
-#			Authenticator
+#			Authenticator (patched for Realtek)
 ### END INIT INFO
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON_SBIN=/usr/sbin/hostapd
-DAEMON_DEFS=/etc/default/hostapd
+DAEMON_SBIN=/usr/sbin/hostapd.rtl
+DAEMON_DEFS=/etc/default/hostapd.rtl
 DAEMON_CONF=
 NAME=hostapd
 DESC="advanced IEEE 802.11 management"
-PIDFILE=/var/run/hostapd.pid
+PIDFILE=/var/run/hostapdi.rtl.pid
 
 [ -x "$DAEMON_SBIN" ] || exit 0
-[ -s "$DAEMON_DEFS" ] && . /etc/default/hostapd
+[ -s "$DAEMON_DEFS" ] && . /etc/default/hostapdi.rtl
 [ -n "$DAEMON_CONF" ] || exit 0
 
 DAEMON_OPTS="-B -P $PIDFILE $DAEMON_OPTS $DAEMON_CONF"
