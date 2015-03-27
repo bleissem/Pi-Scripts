@@ -1,0 +1,9 @@
+Package: hostapd-rtl
+Version: 20140327-1
+Section: base
+Priority: optional
+Architecture: armhf
+Depends: bash, hostapd
+Maintainer: Mattias Schlenker <ms@mattiasschlenker.de>
+Description: hostapd for use with the RT8192CU in Banana Pi R1
+
