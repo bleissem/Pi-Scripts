@@ -41,7 +41,7 @@ if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
 fi
 if [ -z "$PIDISTRO" ] ; then
-	PIDISTRO="utopic" 
+	PIDISTRO="vivid" 
 fi
 if [ -z "$PILANG" ] ; then
 	PILANG="en_US.UTF-8" 
