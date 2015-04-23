@@ -29,7 +29,9 @@
 
 DEBOOTSTRAP=1.0.67
 KERNELMAJOR=3.19
-KERNELPATCH=3.19.3
+KERNELPATCH=.5 # 3.19.5
+KERNELMAJOR=4.0
+KERNELPATCH='' # 4.0
 KPATCHES="linux-3.19-b53.patch"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan 8192"
 BLACKLIST="rtl8192cu"
@@ -111,9 +113,39 @@ function check_progs {
 	done
 }
 
+# Download and unpack Vanilla kernel
+
+function pull_vanilla_kernel {
+	test -f linux-${KERNELMAJOR}.tar.xz || \
+	wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-${KERNELMAJOR}.tar.xz
+	if [ -n "$KERNELPATCH" ] ; then
+		test -f patch-${KERNELMAJOR}${KERNELPATCH}.xz || \
+			wget https://www.kernel.org/pub/linux/kernel/v4.x/patch-${KERNELMAJOR}${KERNELPATCH}.xz
+	fi
+	if [ -f linux-${KERNELMAJOR}${KERNELPATCH}.ready ] ; then
+		echo "OK, kernel already prepared"
+	elif [ -z "$KERNELPATCH" ] ; then
+		tar xJf linux-${KERNELMAJOR}.tar.xz
+		for f in $KPATCHES ; do
+			( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
+		done
+		touch linux-${KERNELMAJOR}.ready
+	else
+		rm -rf linux-${KERNELMAJOR}
+		tar xJf linux-${KERNELMAJOR}.tar.xz
+		( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELMAJOR}${KERNELPATCH}.xz | patch -p1 )
+		for f in $KPATCHES ; do
+			( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
+		done
+		mv linux-${KERNELMAJOR} linux-${KERNELMAJOR}${KERNELPATCH}
+		touch linux-${KERNELMAJOR}${KERNELPATCH}.ready
+	fi
+}
+
 check_arch
 check_dpkg
 check_progs
+pull_vanilla_kernel
 
 # Download and install debootstrap:
 
@@ -182,24 +214,6 @@ mkdir -p rpi2
 test -d firmware || git clone https://github.com/raspberrypi/firmware
 cd firmware 
 git pull )
-
-# Kernel for Banana Pi
-test -f linux-${KERNELMAJOR}.tar.xz || \
-wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
-
-if [ -z "$KERNELPATCH" ] ; then
-	test -d linux-${KERNELMAJOR} || tar xJf linux-${KERNELMAJOR}.tar.xz
-elif [ -f patch-${KERNELPATCH}.xz ] ; then
-	echo "OK, assuming patching done..."
-else
-	wget https://www.kernel.org/pub/linux/kernel/v3.x/patch-${KERNELPATCH}.xz
-	rm -rf linux-${KERNELMAJOR} 
-	tar xJf linux-${KERNELMAJOR}.tar.xz
-	( cd linux-${KERNELMAJOR} ; unxz -c ../patch-${KERNELPATCH}.xz | patch -p1 )
-	for f in $KPATCHES ; do
-		( cd linux-${KERNELMAJOR} ; cat ${basedir}/patches/${f} | patch -p1 )
-	done
-fi
 
 # RTL8192 for Banana Pi
 if [ -d rt8192cu ] ; then
