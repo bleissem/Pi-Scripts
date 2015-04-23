@@ -287,21 +287,21 @@ install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 # Build and install a kernel for Banana Pi M1
 
 install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1.testing" linux-${KERNELMAJOR}/.config
-yes '' | make -C linux-${KERNELMAJOR} oldconfig
-make -C linux-${KERNELMAJOR} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
-( cd linux-${KERNELMAJOR} ; INSTALL_MOD_PATH=../targetfs make modules_install )
+yes '' | make -C linux-${KERNELMAJOR}${KERNELPATCH} oldconfig
+make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
+( cd linux-${KERNELMAJOR}${KERNELPATCH} ; INSTALL_MOD_PATH=../targetfs make modules_install )
 install -m 0644 boot.scr targetfs/boot
 install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd
-install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/uImage targetfs/boot
-install -m 0644 linux-${KERNELMAJOR}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
+install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/uImage targetfs/boot
+install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
 
 # Build and install the rt8192cu module for Banana Pi R1
 
 CURRENTPWD=` pwd `
-KLOCALVERS=` cat linux-${KERNELMAJOR}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
-make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
-mkdir -p targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra 
-install -m 0644 rt8192cu/8192cu.ko targetfs/lib/modules/${KERNELPATCH}${KLOCALVERS}/extra/ 
+KLOCALVERS=` cat linux-${KERNELMAJOR}${KERNELPATCH}/.config | grep CONFIG_LOCALVERSION= | awk -F '=' '{print $2}' | sed 's/"//g' ` 
+make -j 2 -C ${CURRENTPWD}/linux-${KERNELMAJOR}${KERNELPATCH} M=${CURRENTPWD}/rt8192cu USER_EXTRA_CFLAGS='-Wno-error=date-time'
+mkdir -p targetfs/lib/modules/${KERNELMAJOR}${KERNELPATCH}${KLOCALVERS}/extra 
+install -m 0644 rt8192cu/8192cu.ko targetfs/lib/modules/${KERNELMAJOR}${KERNELPATCH}${KLOCALVERS}/extra/ 
 
 # Install firmware
 ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${KLOCALVERS} targetfs
