@@ -28,11 +28,12 @@
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
 DEBOOTSTRAP=1.0.67
-KERNELMAJOR=3.19
-KERNELPATCH=.5 # 3.19.5
-# KERNELMAJOR=4.0
-# KERNELPATCH='' # 4.0
-KPATCHES="linux-3.19-b53.patch"
+# KERNELMAJOR=3.19
+# KERNELPATCH=.5 # 3.19.5
+KERNELMAJOR=4.0
+KERNELPATCH=.4
+# KPATCHES="linux-3.19-b53.patch"
+KPATCHES="linux-4.0.4.openwrt.patch linux-4.0.4.warnings.patch"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan 8192"
 BLACKLIST="rtl8192cu"
 MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen iw"
