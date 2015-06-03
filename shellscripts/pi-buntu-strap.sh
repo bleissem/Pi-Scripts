@@ -34,6 +34,8 @@ KERNELMAJOR=4.0
 KERNELPATCH=.4
 # KPATCHES="linux-3.19-b53.patch"
 KPATCHES="linux-4.0.4.openwrt.patch linux-4.0.4.warnings.patch"
+#BPIKERNELCONF="dotconfig.bananapi.m1.testing"
+BPIKERNELCONF="dotconfig-4.0"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan 8192"
 BLACKLIST="rtl8192cu"
 MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen iw"
@@ -287,7 +289,7 @@ install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
 
 # Build and install a kernel for Banana Pi M1
 
-install -m 0644 "${basedir}/configfiles/dotconfig.bananapi.m1.testing" linux-${KERNELMAJOR}${KERNELPATCH}/.config
+install -m 0644 "${basedir}/configfiles/${BPIKERNELCONF}" linux-${KERNELMAJOR}${KERNELPATCH}/.config
 yes '' | make -C linux-${KERNELMAJOR}${KERNELPATCH} oldconfig
 make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
 ( cd linux-${KERNELMAJOR}${KERNELPATCH} ; INSTALL_MOD_PATH=../targetfs make modules_install )
