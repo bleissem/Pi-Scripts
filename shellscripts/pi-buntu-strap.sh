@@ -120,10 +120,10 @@ function check_progs {
 
 function pull_vanilla_kernel {
 	test -f linux-${KERNELMAJOR}.tar.xz || \
-	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-${KERNELMAJOR}.tar.xz
+	wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-${KERNELMAJOR}.tar.xz
 	if [ -n "$KERNELPATCH" ] ; then
 		test -f patch-${KERNELMAJOR}${KERNELPATCH}.xz || \
-			wget https://www.kernel.org/pub/linux/kernel/v3.x/patch-${KERNELMAJOR}${KERNELPATCH}.xz
+			wget https://www.kernel.org/pub/linux/kernel/v4.x/patch-${KERNELMAJOR}${KERNELPATCH}.xz
 	fi
 	if [ -f linux-${KERNELMAJOR}${KERNELPATCH}.ready ] ; then
 		echo "OK, kernel already prepared"
