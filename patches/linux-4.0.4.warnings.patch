@@ -1,0 +1,21 @@
+diff -ruN linux-4.0.4/drivers/net/phy/b53/Makefile linux-4.0.4.patched/drivers/net/phy/b53/Makefile
+--- linux-4.0.4/drivers/net/phy/b53/Makefile	2015-05-30 05:44:14.040476877 +0000
++++ linux-4.0.4.patched/drivers/net/phy/b53/Makefile	2015-05-30 05:44:54.535038517 +0000
+@@ -7,4 +7,4 @@
+ obj-$(CONFIG_B53_PHY_DRIVER)	+= b53_mdio.o
+ obj-$(CONFIG_B53_SPI_DRIVER)	+= b53_spi.o
+ 
+-ccflags-y			+= -Werror
++ccflags-y			+= -Wno-error
+diff -ruN linux-4.0.4/Makefile linux-4.0.4.patched/Makefile
+--- linux-4.0.4/Makefile	2015-05-30 05:43:41.553616908 +0000
++++ linux-4.0.4.patched/Makefile	2015-05-30 05:44:34.743742782 +0000
+@@ -401,7 +401,7 @@
+ 
+ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -fno-strict-aliasing -fno-common \
+-		   -Werror-implicit-function-declaration \
++		    \
+ 		   -Wno-format-security \
+ 		   -std=gnu89
+ 
