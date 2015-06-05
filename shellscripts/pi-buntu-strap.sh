@@ -284,8 +284,8 @@ sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 # Build and install a kernel for Raspberry Pi 2
 echo '===> Building kernel for Raspberry Pi - logging to kernel.rpi.build.log'
 install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" rpi2/linux/.config
-yes '' | make -C rpi2/linux oldconfig
-make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo )  > kernel.rpi.build.log
+yes '' | make -C rpi2/linux oldconfig > kernel.rpi.build.log
+make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo )  >> kernel.rpi.build.log
 make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules >> kernel.rpi.build.log
 echo '===> Installing kernel for Raspberry Pi - logging to kernel.rpi.install.log'
 INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install  > kernel.rpi.install.log
