@@ -102,13 +102,13 @@ function check_dpkg {
 
 # Check for more programs
 function check_progs {
-	progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4 lsof ruby"
+	progsneeded="gcc bc patch make mkimage git wget kpartx parted mkfs.msdos mkfs.ext4 lsof ruby dtc"
 	for p in $progsneeded ; do
 		which $p
 		retval=$?
 		if [ "$retval" -gt 0 ] ; then
 			echo "$p is missing. Please install dependencies:"
-			echo "apt-get -y install bc libncurses5-dev build-essential u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof ruby2.0"
+			echo "apt-get -y install bc libncurses5-dev build-essential device-tree-compiler u-boot-tools git wget kpartx parted dosfstools e2fsprogs lsof ruby2.0"
 			exit 1
 		else
 			echo "OK, found $p..."
@@ -258,16 +258,19 @@ install -m 0755 "${basedir}/configfiles/etc.fstab" targetfs/etc/fstab
 
 # Build and install U-Boot for Banana Pi M1
 
-make -C u-boot clean
-make -C u-boot Bananapi_config 
-make -C u-boot -j $( grep -c processor /proc/cpuinfo ) 
-mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr
+echo '===> Building u-boot for Banana Pi - logging to u-boot.log'
+make -C u-boot clean > u-boot.log
+make -C u-boot Bananapi_config >> u-boot.log 
+make -C u-boot -j $( grep -c processor /proc/cpuinfo ) >> u-boot.log  
+mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr >> u-boot.log  
+echo '===> Installing u-boot for Banana Pi'
 dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
 dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
 mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
+echo '   > done.'
 
 # Build and install the bootloader for Raspberry Pi 2
-
+echo '===> Installing bootloader for Raspberry Pi'
 for f in bcm2709-rpi-2-b.dtb bootcode.bin \
 	fixup.dat fixup_cd.dat fixup_x.dat \
 	start.elf start_cd.elf start_x.elf ; do
@@ -279,24 +282,26 @@ done
 sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 
 # Build and install a kernel for Raspberry Pi 2
-
+echo '===> Building kernel for Raspberry Pi - logging to kernel.rpi.build.log'
 install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" rpi2/linux/.config
 yes '' | make -C rpi2/linux oldconfig
-make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) 
-make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules
-INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install 
-install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img
+make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo )  > kernel.rpi.build.log
+make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules >> kernel.rpi.build.log
+echo '===> Installing kernel for Raspberry Pi - logging to kernel.rpi.install.log'
+INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install  > kernel.rpi.install.log
+install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img >> kernel.rpi.install.log
 
 # Build and install a kernel for Banana Pi M1
-
+echo '===> Building kernel for Banana Pi - logging to kernel.bpi.build.log'
 install -m 0644 "${basedir}/configfiles/${BPIKERNELCONF}" linux-${KERNELMAJOR}${KERNELPATCH}/.config
 yes '' | make -C linux-${KERNELMAJOR}${KERNELPATCH} oldconfig
-make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs
-( cd linux-${KERNELMAJOR}${KERNELPATCH} ; INSTALL_MOD_PATH=../targetfs make modules_install )
+make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs > kernel.bpi.build.log
+( cd linux-${KERNELMAJOR}${KERNELPATCH} ; INSTALL_MOD_PATH=../targetfs make modules_install ) >> kernel.bpi.build.log
+echo '===> Installing kernel for Banana Pi - logging to kernel.bpi.install.log'
 install -m 0644 boot.scr targetfs/boot
-install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd
-install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/uImage targetfs/boot
-install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot
+install -m 0644 "${basedir}/configfiles/boot.cmd.bananapi.m1" targetfs/boot/boot.cmd > kernel.bpi.install.log
+install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/uImage targetfs/boot >> kernel.bpi.install.log
+install -m 0644 linux-${KERNELMAJOR}${KERNELPATCH}/arch/arm/boot/dts/sun7i-a20-bananapi.dtb targetfs/boot >> kernel.bpi.install.log
 
 # Build and install the rt8192cu module for Banana Pi R1
 
