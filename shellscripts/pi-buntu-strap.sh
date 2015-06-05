@@ -242,7 +242,8 @@ fi
 # Mount the disk image and install the base filesystem
 mkdir -p targetfs
 mount /dev/mapper/$( basename $FREELOOP )p3 targetfs
-debootstrap --verbose --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/
+echo '===> Installing base system - logging to debootstrap.log'
+debootstrap --verbose --arch armhf $PIDISTRO targetfs http://ports.ubuntu.com/ > debootstrap.log
 retval=$?
 
 if [ "$retval" -gt 0 ] ; then
