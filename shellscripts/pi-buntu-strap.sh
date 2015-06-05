@@ -32,6 +32,7 @@ DEBOOTSTRAP=1.0.67
 # KERNELPATCH=.5 # 3.19.5
 KERNELMAJOR=4.0
 KERNELPATCH=.4
+UBOOT="v2015.04"
 # KPATCHES="linux-3.19-b53.patch"
 KPATCHES="linux-4.0-b53.patch"
 #BPIKERNELCONF="dotconfig.bananapi.m1.testing"
@@ -209,6 +210,7 @@ mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 
 test -d u-boot || git clone http://git.denx.de/u-boot.git
 ( cd u-boot ; git pull )
+( cd u-boot ; git checkout -b $UBOOT ) 
 
 # Bootloader/Firmware for Raspberry Pi 2
 
