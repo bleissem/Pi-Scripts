@@ -294,8 +294,8 @@ install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img >> kern
 # Build and install a kernel for Banana Pi M1
 echo '===> Building kernel for Banana Pi - logging to kernel.bpi.build.log'
 install -m 0644 "${basedir}/configfiles/${BPIKERNELCONF}" linux-${KERNELMAJOR}${KERNELPATCH}/.config
-yes '' | make -C linux-${KERNELMAJOR}${KERNELPATCH} oldconfig
-make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs > kernel.bpi.build.log
+yes '' | make -C linux-${KERNELMAJOR}${KERNELPATCH} oldconfig > kernel.bpi.build.log
+make -C linux-${KERNELMAJOR}${KERNELPATCH} -j $( grep -c processor /proc/cpuinfo ) LOADADDR=0x40008000 uImage modules dtbs >> kernel.bpi.build.log
 ( cd linux-${KERNELMAJOR}${KERNELPATCH} ; INSTALL_MOD_PATH=../targetfs make modules_install ) >> kernel.bpi.build.log
 echo '===> Installing kernel for Banana Pi - logging to kernel.bpi.install.log'
 install -m 0644 boot.scr targetfs/boot
