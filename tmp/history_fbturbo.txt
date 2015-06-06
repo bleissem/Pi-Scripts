@@ -1,0 +1,31 @@
+    1  cd /usr/src/
+    2  apt-get install git libX11-dev 
+    3  git clone https://github.com/ssvb/xf86-video-fbturbo 
+    4  cd xf86-video-fbturbo/
+    5  ls
+    6  bash autogen.sh 
+    7  apt-get install autoconf automake
+    8  bash autogen.sh 
+    9  apt-get install xorg-macros m4
+   10  apt-cache search macros
+   11  apt-cache search macros | grep -i x
+   12  apt-cache search macros | grep -i xorg
+   13  apt-cache search macros | grep -i x11
+   14  apt-cache search xorg-dev
+   15  apt-get install xorg-dev xserver-xorg-dev 
+   16  bash autogen.sh 
+   17  apt-get install xutils-dev
+   18  bash autogen.sh 
+   19  autoreconf -fi
+   20  apt-get install libtool
+   21  bash autogen.sh 
+   22  ./configure --prefix=/usr --sysconfdir=/etc 
+   23  ./configure --prefix=/usr --sysconfdir=/etc && make -j2 
+   24  make install DESTDIR=/tmp/fbturbo
+   25  find /tmp/fbturbo/ -type f
+   26  make install
+   27  less xorg.conf 
+   28  install -m 0644 xorg.conf /etc/X11/xorg.conf 
+   29  reboot
+   30  history 
+   31  history > /root/history.txt 
