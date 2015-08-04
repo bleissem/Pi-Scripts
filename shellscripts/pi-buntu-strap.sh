@@ -273,11 +273,12 @@ mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1
 echo '===> Installing u-boot for Banana Pi'
 dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8 conv=sync
 dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40 conv=sync 
-mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
+sync
 echo '   > done.'
 
 # Build and install the bootloader for Raspberry Pi 2
 echo '===> Installing bootloader for Raspberry Pi'
+mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 for f in bcm2709-rpi-2-b.dtb bootcode.bin \
 	fixup.dat fixup_cd.dat fixup_x.dat \
 	start.elf start_cd.elf start_x.elf ; do
