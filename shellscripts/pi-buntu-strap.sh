@@ -33,9 +33,9 @@ DEBOOTSTRAP=1.0.67
 # KERNELMAJOR=4.0
 # KERNELPATCH=.4
 KERNELMAJOR=4.1
-KERNELPATCH=.3
-# UBOOT="v2015.04"
-UBOOT='348cce20efca09a340e75bef8654684782d320ba'
+KERNELPATCH=.4
+UBOOT="v2015.04"
+# UBOOT='348cce20efca09a340e75bef8654684782d320ba'
 # KPATCHES="linux-3.19-b53.patch"
 KPATCHES="linux-4.0-b53.patch"
 # BPIKERNELCONF="dotconfig.bananapi.m1.testing"
@@ -167,7 +167,7 @@ PIBLOCKS=$(( $PISIZE / 1048576 ))
 SWAPBLOCKS=$(( $PISWAP / 1048576 ))
 SWAPBYTES=$(( $SWAPBLOCKS * 1048576 ))
 echo "OK, using $PIBLOCKS one MB blocks"
-dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) of=disk.img 
+dd if=/dev/zero bs=1048576 count=1 seek=$(( $PIBLOCKS - 1 )) conv=sync of=disk.img 
 modprobe -v loop 
 FREELOOP=` losetup -f `
 retval=$?
@@ -181,7 +181,7 @@ fi
 
 echo "OK, using loop device $FREELOOP"
 losetup $FREELOOP disk.img
-dd if=/dev/zero bs=1048576 count=128 of=$FREELOOP
+dd if=/dev/zero bs=1048576 count=128 of=$FREELOOP conv=sync
 echo "OK, partitioning the device"
 parted -s $FREELOOP mklabel msdos
 parted -s $FREELOOP unit B mkpart primary fat16 1048576 67108863
@@ -201,7 +201,7 @@ fi
 
 echo "OK, creating filesystems"
 for n in 1 2 3 ; do
-	dd if=/dev/zero bs=1M count=8 of=/dev/mapper/$( basename $FREELOOP )p${n} 
+	dd if=/dev/zero bs=1M count=8 of=/dev/mapper/$( basename $FREELOOP )p${n} conv=sync 
 done 
 mkfs.msdos /dev/mapper/$( basename $FREELOOP )p1
 mkswap     /dev/mapper/$( basename $FREELOOP )p2
@@ -214,7 +214,7 @@ mkfs.ext4  /dev/mapper/$( basename $FREELOOP )p3
 
 test -d u-boot || git clone http://git.denx.de/u-boot.git
 ( cd u-boot ; git pull )
-( cd u-boot ; git checkout $UBOOT ) 
+( cd u-boot ; git checkout -b $UBOOT ) 
 
 # Bootloader/Firmware for Raspberry Pi 2
 
@@ -271,8 +271,8 @@ make -C u-boot Bananapi_config >> u-boot.log
 make -C u-boot -j $( grep -c processor /proc/cpuinfo ) >> u-boot.log  
 mkimage -C none -A arm -T script -d "${basedir}/configfiles/boot.cmd.bananapi.m1" boot.scr >> u-boot.log  
 echo '===> Installing u-boot for Banana Pi'
-dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8
-dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40
+dd if=u-boot/spl/sunxi-spl.bin of=$FREELOOP bs=1024 seek=8 conv=sync
+dd if=u-boot/u-boot.img        of=$FREELOOP bs=1024 seek=40 conv=sync 
 mount /dev/mapper/$( basename $FREELOOP )p1 targetfs/boot
 echo '   > done.'
 
