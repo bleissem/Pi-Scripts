@@ -27,7 +27,7 @@
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
-DEBOOTSTRAP=1.0.67
+DEBOOTSTRAP=1.0.72
 # KERNELMAJOR=3.19
 # KERNELPATCH=.5 # 3.19.5
 # KERNELMAJOR=4.0
