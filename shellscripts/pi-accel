@@ -1,0 +1,43 @@
+#!/bin/bash
+
+me=` id -u `
+if [ "$me" -gt 0 ] ; then
+	echo 'Please run this script with root privileges!'
+	exit 1
+fi
+
+apt-get update 
+apt-get install git libx11-dev build-essential autoconf xorg-macros xutils-dev \
+	libtool libxrandr-dev x11proto-randr-dev libltdl-dev libtool automake \
+	libdrm-dev build-essential xorg-dev xutils-dev x11proto-dri2-dev 
+
+if grep fbturbo /var/log/Xorg.0.log ; then
+	echo '---> fbturbo already active, skipping installation'
+	exit 0
+fi
+
+if [ -d /usr/src/xf86-video-fbturbo ] ; then
+	echo '---> directory exists, updating'
+	make -C /usr/src/xf86-video-fbturbo clean
+	( cd /usr/src/xf86-video-fbturbo ; git pull )
+else 
+	( cd /usr/src ; git clone https://github.com/ssvb/xf86-video-fbturbo )
+fi
+
+cd /usr/src/xf86-video-fbturbo
+make clean
+autoreconf -vi
+./configure --prefix=/usr
+make -j $( grep -c processor /proc/cpuinfo ) || exit 1
+make install || exit 1
+
+if [ -f /etc/X11/xorg.conf ] ; then
+	echo '---> /etc/X11/xorg.conf already exists, please update it manually'
+	echo '     according to the sample in this directory:'
+	echo 
+	cat xorg.conf
+else
+	install -m 0644 xorg.conf /etc/X11/xorg.conf
+fi
+
+echo '---> Done. Please reboot now.'
