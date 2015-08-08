@@ -361,6 +361,7 @@ done
 install -m 0755 "${basedir}/shellscripts/pi-firstrun" targetfs/usr/sbin
 install -m 0755 "${basedir}/shellscripts/pi-stretch" targetfs/usr/sbin
 install -m 0755 "${basedir}/shellscripts/pi-update" targetfs/usr/sbin
+install -m 0755 "${basedir}/shellscripts/pi-accel" targetfs/usr/sbin
 echo '' >> "targetfs/etc/rc.local"
 sed -i 's%exit 0%# exit 0%g' "targetfs/etc/rc.local"
 echo '/usr/sbin/pi-firstrun' >> "targetfs/etc/rc.local"
