@@ -27,12 +27,12 @@
 #
 # IGNOREDPKG=1 # Use after installing debootstrap on non Debian OS
 
-DEBOOTSTRAP=1.0.72
+DEBOOTSTRAP=1.0.75
 # KERNELMAJOR=3.19
 # KERNELPATCH=.5 # 3.19.5
 # KERNELMAJOR=4.0
 # KERNELPATCH=.4
-KERNELMAJOR=4.1
+KERNELMAJOR=4.2
 KERNELPATCH=.6
 # UBOOT="v2015.04"
 # UBOOT='348cce20efca09a340e75bef8654684782d320ba'
@@ -41,7 +41,7 @@ UBOOT='44c8fd3abaded5bf18a48947c6d1286927cbdf2b'
 KPATCHES="linux-4.0-b53.patch"
 # BPIKERNELCONF="dotconfig.bananapi.m1.testing"
 # BPIKERNELCONF="dotconfig-4.0"
-BPIKERNELCONF="dotconfig-4.1"
+BPIKERNELCONF="dotconfig-4.2"
 XTRAMODULES="b53_spi b53_mdio b53_srab ipvlan 8192"
 BLACKLIST="rtl8192cu"
 MINPACKAGES="language-pack-en vlan parted bridge-utils psmisc screen iw"
@@ -50,7 +50,7 @@ if [ -z "$PISIZE" ] ; then
 	PISIZE=4000000000
 fi
 if [ -z "$PIDISTRO" ] ; then
-	PIDISTRO="vivid" 
+	PIDISTRO="wily" 
 fi
 if [ -z "$PILANG" ] ; then
 	PILANG="en_US.UTF-8" 
