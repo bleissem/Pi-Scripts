@@ -7,9 +7,10 @@ if [ "$me" -gt 0 ] ; then
 fi
 
 apt-get update 
-apt-get install git libx11-dev build-essential autoconf xorg-macros xutils-dev \
+apt-get -y install git libx11-dev build-essential autoconf xutils-dev \
 	libtool libxrandr-dev x11proto-randr-dev libltdl-dev libtool automake \
-	libdrm-dev build-essential xorg-dev xutils-dev x11proto-dri2-dev 
+	libdrm-dev build-essential xorg-dev xutils-dev x11proto-dri2-dev
+apt-get -y install xorg-macros
 
 if grep fbturbo /var/log/Xorg.0.log ; then
 	echo '---> fbturbo already active, skipping installation'
