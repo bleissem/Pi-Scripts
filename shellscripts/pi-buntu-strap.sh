@@ -321,7 +321,7 @@ mkdir -p targetfs/lib/modules/${KERNELMAJOR}${KERNELPATCH}${KLOCALVERS}/extra
 install -m 0644 rt8192cu/8192cu.ko targetfs/lib/modules/${KERNELMAJOR}${KERNELPATCH}${KLOCALVERS}/extra/ 
 
 # Install firmware
-ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELPATCH}${KLOCALVERS} targetfs
+ruby "${basedir}/shellscripts/firmwarefinder.rb" ${KERNELMAJOR}${KERNELPATCH}${KLOCALVERS} targetfs
 
 # Install basic configuration
 
