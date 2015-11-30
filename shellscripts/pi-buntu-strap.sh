@@ -237,7 +237,7 @@ fi
 test -d linux || git clone https://github.com/raspberrypi/linux
 cd linux 
 git pull
-git checkout rpi-3.18.y )
+git checkout rpi-4.1.y )
 
 # Linux Firmware
 if [ -d linux-firmware ] ; then
@@ -292,12 +292,13 @@ sed -i 's/mmcblk0p2/mmcblk0p3/g' targetfs/boot/cmdline.txt
 
 # Build and install a kernel for Raspberry Pi 2
 echo '===> Building kernel for Raspberry Pi - logging to kernel.rpi.build.log'
-install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" rpi2/linux/.config
-yes '' | make -C rpi2/linux oldconfig > kernel.rpi.build.log
-make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo )  >> kernel.rpi.build.log
-make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules >> kernel.rpi.build.log
+KERNEL=kernel7 make -C rpi2/linux  bcm2709_defconfig
+# install -m 0644 "${basedir}/configfiles/dotconfig.raspberrypi.2" rpi2/linux/.config
+# yes '' | make -C rpi2/linux oldconfig > kernel.rpi.build.log
+KERNEL=kernel7 make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo )  >> kernel.rpi.build.log
+KERNEL=kernel7 make -C rpi2/linux -j $( grep -c processor /proc/cpuinfo ) modules >> kernel.rpi.build.log
 echo '===> Installing kernel for Raspberry Pi - logging to kernel.rpi.install.log'
-INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install  > kernel.rpi.install.log
+KERNEL=kernel7 INSTALL_MOD_PATH=../../targetfs make -C rpi2/linux modules_install  > kernel.rpi.install.log
 install -m 0644 rpi2/linux/arch/arm/boot/Image targetfs/boot/kernel7.img >> kernel.rpi.install.log
 
 # Build and install a kernel for Banana Pi M1
