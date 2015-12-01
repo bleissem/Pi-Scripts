@@ -46,5 +46,6 @@ if dmesg | grep bcm2709 ; then
 	echo "auto $ifname" >> /etc/network/interfaces 
 	echo "iface $ifname inet dhcp" >> /etc/network/interfaces 
 	rm /.firstrun 
+	reboot
 fi
 exit 0
