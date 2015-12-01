@@ -39,4 +39,12 @@ if dmesg | grep b53 | grep -q 'found switch' ; then
 	rm /.firstrun
 	reboot
 fi
+if dmesg | grep bcm2709 ; then
+	echo 'Detected Raspberry Pi, changing network config'
+	ifname=` ifconfig -a | grep -i 'encap:ethernet' | head -n1 | awk '{print $1}' `
+	echo "" >> /etc/network/interfaces 
+	echo "auto $ifname" >> /etc/network/interfaces 
+	echo "iface $ifname inet dhcp" >> /etc/network/interfaces 
+	rm /.firstrun 
+fi
 exit 0
